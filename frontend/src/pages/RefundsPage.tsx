@@ -1,0 +1,106 @@
+import React, { useEffect, useState } from 'react';
+import { RotateCcw, RefreshCw, ExternalLink } from 'lucide-react';
+import { apiRequest } from '../services/api';
+import { RefundDto } from '../types';
+import { StatusBadge } from '../components/StatusBadge';
+import { useNavigate } from 'react-router-dom';
+
+export const RefundsPage: React.FC = () => {
+  const [refunds, setRefunds] = useState<RefundDto[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
+
+  const fetchRefunds = async () => {
+    setLoading(true);
+    try {
+      const res = await apiRequest<{ content: RefundDto[] }>('/refunds?page=0&size=50');
+      setRefunds(res?.content || []);
+    } catch (err) {
+      console.error('Failed to load refunds', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRefunds();
+  }, []);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-white">Refunds Management</h1>
+          <p className="text-sm text-slate-400 mt-1">
+            Track full and partial customer refunds across integrated providers
+          </p>
+        </div>
+
+        <button
+          onClick={fetchRefunds}
+          className="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition-colors"
+          title="Refresh"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-emerald-400' : ''}`} />
+        </button>
+      </div>
+
+      <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm text-slate-300">
+            <thead className="bg-slate-950 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-800">
+              <tr>
+                <th className="py-3.5 px-4">Refund ID</th>
+                <th className="py-3.5 px-4">Amount</th>
+                <th className="py-3.5 px-4">Status</th>
+                <th className="py-3.5 px-4">Reason</th>
+                <th className="py-3.5 px-4">Provider Reference</th>
+                <th className="py-3.5 px-4">Timestamp</th>
+                <th className="py-3.5 px-4 text-right">Payment</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800/60">
+              {refunds.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-slate-500 text-xs">
+                    No refunds issued yet. Refunds can be initiated from any successful payment details page.
+                  </td>
+                </tr>
+              ) : (
+                refunds.map((r) => (
+                  <tr key={r.id} className="hover:bg-slate-800/30">
+                    <td className="py-3.5 px-4 font-mono text-xs text-slate-300">{r.id.substring(0, 13)}...</td>
+                    <td className="py-3.5 px-4 font-semibold text-rose-300">
+                      -{(r.amountMinor / 100).toFixed(2)} {r.currency}
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <StatusBadge status={r.status} size="sm" />
+                    </td>
+                    <td className="py-3.5 px-4 text-xs text-slate-400">{r.reason || 'N/A'}</td>
+                    <td className="py-3.5 px-4 font-mono text-xs text-slate-400">
+                      {r.providerRefundReference || 'Pending'}
+                    </td>
+                    <td className="py-3.5 px-4 text-xs text-slate-400">
+                      {new Date(r.createdAt).toLocaleString()}
+                    </td>
+                    <td className="py-3.5 px-4 text-right">
+                      <button
+                        onClick={() => navigate(`/payments/${r.paymentId}`)}
+                        className="text-xs text-emerald-400 hover:text-emerald-300 inline-flex items-center space-x-1"
+                      >
+                        <span>View</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
