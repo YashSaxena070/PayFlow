@@ -12,33 +12,34 @@ export const StatusBadge: React.FC<Props> = ({ status, size = 'md' }) => {
     switch (normalized) {
       case 'SUCCEEDED':
       case 'AUTO_RESOLVED':
-        return 'bg-emerald-950/80 text-emerald-400 border-emerald-800';
+      case 'HEALTHY':
+        return 'bg-[#E2F899] text-[#2C410F] border-[#D4EE7F]';
       case 'FAILED':
-        return 'bg-rose-950/80 text-rose-400 border-rose-800';
+      case 'DECLINED':
+      case 'UNHEALTHY':
+      case 'CLOSED':
+        return 'bg-[#FED7CA] text-[#991B1B] border-[#FCA5A5]';
       case 'PENDING':
       case 'PROCESSING':
       case 'OPEN':
-        return 'bg-amber-950/80 text-amber-400 border-amber-800';
+        return 'bg-[#FEF08A] text-[#854D0E] border-[#FDE047]';
       case 'REQUIRES_ACTION':
-        return 'bg-cyan-950/80 text-cyan-400 border-cyan-800';
+        return 'bg-[#BAE6FD] text-[#0369A1] border-[#7DD3FC]';
       case 'PARTIALLY_REFUNDED':
-        return 'bg-purple-950/80 text-purple-400 border-purple-800';
       case 'REFUNDED':
-        return 'bg-indigo-950/80 text-indigo-400 border-indigo-800';
+        return 'bg-[#E9D5FF] text-[#6B21A8] border-[#D8B4FE]';
       case 'CANCELLED':
-        return 'bg-slate-800 text-slate-400 border-slate-700';
       default:
-        return 'bg-slate-800 text-slate-300 border-slate-700';
+        return 'bg-[#EFEAE2] text-[#57534E] border-[#DCD5C9]';
     }
   };
 
-  const px = size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-2.5 py-1 text-xs';
+  const px = size === 'sm' ? 'px-2 py-0.5 text-[11px]' : 'px-2.5 py-1 text-xs';
 
   return (
     <span className={`inline-flex items-center font-medium rounded-full border ${getStyle()} ${px}`}>
-      <span className="w-1.5 h-1.5 mr-1.5 rounded-full bg-current opacity-75" />
+      <span className="w-1.5 h-1.5 mr-1.5 rounded-full bg-current opacity-70" />
       {normalized}
     </span>
   );
 };
-

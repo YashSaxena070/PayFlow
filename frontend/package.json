@@ -1,12 +1,13 @@
 {
-  "name": "payflow-frontend",
+  "name": "fluxpay-frontend",
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:ci": "tsc --noEmit"
   },
   "dependencies": {
     "lucide-react": "^1.16.0",

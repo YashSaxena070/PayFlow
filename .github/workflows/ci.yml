@@ -1,4 +1,4 @@
-name: PayFlow CI Pipeline
+name: FluxPay CI Pipeline
 
 on:
   push:
@@ -20,6 +20,9 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
+
+      - name: Make Maven Wrapper Executable
+        run: chmod +x ./mvnw
 
       - name: Build with Maven
         run: ./mvnw clean verify -B

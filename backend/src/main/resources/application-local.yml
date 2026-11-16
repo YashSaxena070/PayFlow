@@ -19,3 +19,8 @@ spring:
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
 
+payflow:
+  kafka:
+    listener:
+      enabled: false
+

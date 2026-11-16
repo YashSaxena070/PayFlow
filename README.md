@@ -1,4 +1,4 @@
-# ⚡ PayFlow Enterprise — AI Payment Orchestration Platform
+# ⚡ FluxPay Enterprise — AI Payment Orchestration Platform
 
 [![Java](https://img.shields.io/badge/Java-21%20LTS-orange.svg)](https://www.oracle.com/java/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.4-brightgreen.svg)](https://spring.io/projects/spring-boot)
@@ -10,9 +10,9 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-cyan.svg)](https://tailwindcss.com/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-lightgrey.svg)](LICENSE)
 
-**PayFlow Enterprise** is an enterprise-grade, multi-tenant payment orchestration engine designed to route, process, reconcile, and audit transactions across global payment gateways (including Stripe and Adyen simulator adapters). 
+**FluxPay Enterprise** is an enterprise-grade, multi-tenant payment orchestration engine designed to route, process, reconcile, and audit transactions across global and Indian payment gateways (**Stripe**, **Razorpay**, **PayU**, and **Cashfree Payments**). 
 
-Engineered for ultra-high reliability and financial correctness, PayFlow features **distributed idempotency**, **dynamic smart routing with Resilience4j circuit breakers**, **ambiguous timeout safety** (preventing duplicate customer charges), **durable webhook deduplication**, **transactional outbox event streaming via Kafka**, and an **interactive React 18 merchant management console**.
+Engineered for ultra-high reliability and financial correctness, FluxPay features **distributed idempotency**, **dynamic smart routing with Resilience4j circuit breakers**, **ambiguous timeout safety** (preventing duplicate customer charges), **durable webhook deduplication**, **transactional outbox event streaming via Kafka**, and an **interactive React 18 merchant management console**.
 
 ---
 
@@ -57,7 +57,7 @@ flowchart TD
         IdempotencyLayer["Distributed Idempotency Engine<br/>(Redis Lock + SHA-256 Canonical Hashing)"]
     end
 
-    subgraph CoreEngine ["PayFlow Core Backend (Spring Boot 3.3.4, Port 8080)"]
+    subgraph CoreEngine ["FluxPay Core Backend (Spring Boot 3.3.4, Port 8080)"]
         RoutingService["Dynamic Routing Engine<br/>(Priority / Weighted Traffic Split)"]
         CircuitBreakers["Resilience4j Circuit Breakers<br/>(Stripe & Adyen Failover Guards)"]
         PaymentService["Payment State Machine & Execution<br/>(Ambiguous Timeout Safety)"]
@@ -71,9 +71,11 @@ flowchart TD
         Kafka[("Apache Kafka 7.6 KRaft (Port 9094)<br/>Transactional Payment Events")]
     end
 
-    subgraph Gateways ["Payment Gateway Adapters & Simulators"]
-        StripeSim["Stripe Gateway Adapter<br/>(Success, 3DS, Decline, Timeout, 5xx)"]
-        AdyenSim["Adyen Gateway Adapter<br/>(Success, 3DS, Decline, Timeout, 5xx)"]
+    subgraph Gateways ["Integrated Payment Service Providers (PSPs)"]
+        StripeSim["Stripe Gateway Adapter<br/>(PaymentIntents, 3DS, Refunds, Webhooks)"]
+        RazorpaySim["Razorpay Gateway Adapter<br/>(Orders, UPI, Netbanking, Webhooks)"]
+        PayUSim["PayU India Gateway Adapter<br/>(SHA-512 Hash, Hosted Checkout, Postservice)"]
+        CashfreeSim["Cashfree Payments Adapter<br/>(PG Orders v2023-08-01, Refunds, Webhooks)"]
     end
 
     UserBrowser -->|HTTP| Nginx
@@ -84,7 +86,9 @@ flowchart TD
     IdempotencyLayer --> RoutingService
     RoutingService --> CircuitBreakers
     CircuitBreakers --> StripeSim
-    CircuitBreakers --> AdyenSim
+    CircuitBreakers --> RazorpaySim
+    CircuitBreakers --> PayUSim
+    CircuitBreakers --> CashfreeSim
     RoutingService --> PaymentService
     PaymentService --> Postgres
     PaymentService --> OutboxPublisher
@@ -98,7 +102,7 @@ flowchart TD
 
 ## 📋 Acceptance Criteria Verification Matrix
 
-Every specification requirement from the PayFlow implementation guidelines is fully satisfied, covered by unit/integration tests, and live-tested in the production container stack:
+Every specification requirement from the FluxPay implementation guidelines is fully satisfied, covered by unit/integration tests, and live-tested in the production container stack:
 
 | ID | Acceptance Criteria | Implementation Component | Test / Verification Coverage | Status |
 |---|---|---|---|:---:|
@@ -142,17 +146,17 @@ Every specification requirement from the PayFlow implementation guidelines is fu
 
 ## 🔌 Port Mappings & Network Topology
 
-To prevent collisions with existing services running on host machines, the Dockerized services are mapped to non-conflicting host ports while communicating over standard internal ports within the isolated `payflow-net` bridge network:
+To prevent collisions with existing services running on host machines, the Dockerized services are mapped to non-conflicting host ports while communicating over standard internal ports within the isolated `fluxpay-net` bridge network:
 
 | Service | Container Name | Host Port | Internal Container Port | Protocol / Purpose |
 |---|---|:---:|:---:|---|
-| **Merchant Console UI** | `payflow-frontend` | `3000` | `80` | HTTP / Single Page Application & API Proxy |
-| **PayFlow Core Backend** | `payflow-backend` | `8080` | `8080` | HTTP / REST API & Health Endpoints |
-| **PostgreSQL Database** | `payflow-postgres` | `5433` | `5432` | TCP / Relational Primary Storage |
-| **Redis Cache & Lock** | `payflow-redis` | `6380` | `6379` | TCP / Distributed Idempotency Cache |
-| **Apache Kafka Broker** | `payflow-kafka` | `9094` | `9092` / `29092` | TCP / KRaft Event Bus |
+| **Merchant Console UI** | `fluxpay-frontend` | `3000` | `80` | HTTP / Single Page Application & API Proxy |
+| **FluxPay Core Backend** | `fluxpay-backend` | `8080` | `8080` | HTTP / REST API & Health Endpoints |
+| **PostgreSQL Database** | `fluxpay-postgres` | `5433` | `5432` | TCP / Relational Primary Storage |
+| **Redis Cache & Lock** | `fluxpay-redis` | `6380` | `6379` | TCP / Distributed Idempotency Cache |
+| **Apache Kafka Broker** | `fluxpay-kafka` | `9094` | `9092` / `29092` | TCP / KRaft Event Bus |
 
-> **Note**: Within the internal Docker network (`payflow-net`), the backend connects to `postgres:5432`, `redis:6379`, and `kafka:29092`. Host tools (such as pgAdmin, DBeaver, or Redis Insight) connect via the mapped host ports (`5433`, `6380`, `9094`).
+> **Note**: Within the internal Docker network (`fluxpay-net`), the backend connects to `postgres:5432`, `redis:6379`, and `kafka:29092`. Host tools (such as pgAdmin, DBeaver, or Redis Insight) connect via the mapped host ports (`5433`, `6380`, `9094`).
 
 ---
 
@@ -179,11 +183,11 @@ docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 Expected output:
 ```text
 NAMES              STATUS                    PORTS
-payflow-frontend   Up (healthy)              0.0.0.0:3000->80/tcp
-payflow-backend    Up (healthy)              0.0.0.0:8080->8080/tcp
-payflow-postgres   Up (healthy)              0.0.0.0:5433->5432/tcp
-payflow-redis      Up (healthy)              0.0.0.0:6380->6379/tcp
-payflow-kafka      Up (healthy)              0.0.0.0:9094->9092/tcp
+fluxpay-frontend   Up (healthy)              0.0.0.0:3000->80/tcp
+fluxpay-backend    Up (healthy)              0.0.0.0:8080->8080/tcp
+fluxpay-postgres   Up (healthy)              0.0.0.0:5433->5432/tcp
+fluxpay-redis      Up (healthy)              0.0.0.0:6380->6379/tcp
+fluxpay-kafka      Up (healthy)              0.0.0.0:9094->9092/tcp
 ```
 
 ### 4. Access the Applications
@@ -376,7 +380,7 @@ curl -X GET http://localhost:8080/api/v1/analytics/overview \
 
 ## 🧪 Automated Test Suite
 
-PayFlow features an exhaustive test suite covering unit, integration, and security layers:
+FluxPay features an exhaustive test suite covering unit, integration, and security layers:
 
 ```bash
 # Run complete test suite (31 tests)

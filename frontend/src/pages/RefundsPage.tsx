@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { RotateCcw, RefreshCw, ExternalLink } from 'lucide-react';
+import { RefreshCw, ExternalLink } from 'lucide-react';
 import { apiRequest } from '../services/api';
 import { RefundDto } from '../types';
 import { StatusBadge } from '../components/StatusBadge';
@@ -28,28 +28,31 @@ export const RefundsPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-300">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Refunds Management</h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <span className="text-xs font-semibold uppercase tracking-wider text-[#FF5A36] block mb-1">
+            SETTLEMENTS
+          </span>
+          <h1 className="text-3xl font-medium tracking-tight text-[#191816]">Refunds Management</h1>
+          <p className="text-sm text-[#78716C] mt-1">
             Track full and partial customer refunds across integrated providers
           </p>
         </div>
 
         <button
           onClick={fetchRefunds}
-          className="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition-colors"
+          className="p-2.5 rounded-full bg-white hover:bg-[#FAF7F2] text-[#57534E] border border-[#EBE6DD] transition-colors shadow-sm"
           title="Refresh"
         >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-emerald-400' : ''}`} />
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[#FF5A36]' : ''}`} />
         </button>
       </div>
 
-      <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-white border border-[#EBE6DD] rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-300">
-            <thead className="bg-slate-950 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-800">
+          <table className="w-full text-left text-sm text-[#191816]">
+            <thead className="bg-[#FAF7F2] text-[#78716C] text-xs uppercase tracking-wider border-b border-[#EBE6DD] font-medium">
               <tr>
                 <th className="py-3.5 px-4">Refund ID</th>
                 <th className="py-3.5 px-4">Amount</th>
@@ -60,34 +63,34 @@ export const RefundsPage: React.FC = () => {
                 <th className="py-3.5 px-4 text-right">Payment</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-[#EBE6DD]">
               {refunds.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-500 text-xs">
+                  <td colSpan={7} className="py-12 text-center text-[#78716C] text-xs">
                     No refunds issued yet. Refunds can be initiated from any successful payment details page.
                   </td>
                 </tr>
               ) : (
                 refunds.map((r) => (
-                  <tr key={r.id} className="hover:bg-slate-800/30">
-                    <td className="py-3.5 px-4 font-mono text-xs text-slate-300">{r.id.substring(0, 13)}...</td>
-                    <td className="py-3.5 px-4 font-semibold text-rose-300">
+                  <tr key={r.id} className="hover:bg-[#FAF7F2]/80 transition-colors">
+                    <td className="py-3.5 px-4 font-mono text-xs text-[#191816] font-medium">{r.id.substring(0, 13)}...</td>
+                    <td className="py-3.5 px-4 font-medium text-[#991B1B]">
                       -{(r.amountMinor / 100).toFixed(2)} {r.currency}
                     </td>
                     <td className="py-3.5 px-4">
                       <StatusBadge status={r.status} size="sm" />
                     </td>
-                    <td className="py-3.5 px-4 text-xs text-slate-400">{r.reason || 'N/A'}</td>
-                    <td className="py-3.5 px-4 font-mono text-xs text-slate-400">
+                    <td className="py-3.5 px-4 text-xs text-[#57534E]">{r.reason || 'N/A'}</td>
+                    <td className="py-3.5 px-4 font-mono text-xs text-[#78716C]">
                       {r.providerRefundReference || 'Pending'}
                     </td>
-                    <td className="py-3.5 px-4 text-xs text-slate-400">
+                    <td className="py-3.5 px-4 text-xs text-[#78716C]">
                       {new Date(r.createdAt).toLocaleString()}
                     </td>
                     <td className="py-3.5 px-4 text-right">
                       <button
                         onClick={() => navigate(`/payments/${r.paymentId}`)}
-                        className="text-xs text-emerald-400 hover:text-emerald-300 inline-flex items-center space-x-1"
+                        className="text-xs text-[#FF5A36] hover:text-[#E84B29] font-semibold inline-flex items-center space-x-1"
                       >
                         <span>View</span>
                         <ExternalLink className="w-3 h-3" />
@@ -103,4 +106,3 @@ export const RefundsPage: React.FC = () => {
     </div>
   );
 };
-

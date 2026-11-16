@@ -1,4 +1,4 @@
-# PayFlow Database Schema & Migration Guide
+# FluxPay Database Schema & Migration Guide
 
 ## 1. Schema Evolution & Flyway
 

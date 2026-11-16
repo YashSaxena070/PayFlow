@@ -1,10 +1,10 @@
-# PayFlow Enterprise REST API Specification
+# FluxPay Enterprise REST API Specification
 
 Base URL: `/api/v1`
 
 ## Standard Response Envelope
 
-All API endpoints return JSON conforming to the PayFlow standard envelope:
+All API endpoints return JSON conforming to the FluxPay standard envelope:
 
 ```json
 {

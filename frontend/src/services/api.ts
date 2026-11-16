@@ -1,21 +1,23 @@
 const API_BASE = '/api/v1';
 
 export function getStoredToken(): string | null {
-  return localStorage.getItem('payflow_token');
+  return localStorage.getItem('fluxpay_token') || localStorage.getItem('payflow_token');
 }
 
 export function setStoredSession(token: string, sessionData: any) {
-  localStorage.setItem('payflow_token', token);
-  localStorage.setItem('payflow_session', JSON.stringify(sessionData));
+  localStorage.setItem('fluxpay_token', token);
+  localStorage.setItem('fluxpay_session', JSON.stringify(sessionData));
 }
 
 export function clearStoredSession() {
+  localStorage.removeItem('fluxpay_token');
+  localStorage.removeItem('fluxpay_session');
   localStorage.removeItem('payflow_token');
   localStorage.removeItem('payflow_session');
 }
 
 export function getStoredSession(): any | null {
-  const data = localStorage.getItem('payflow_session');
+  const data = localStorage.getItem('fluxpay_session') || localStorage.getItem('payflow_session');
   return data ? JSON.parse(data) : null;
 }
 
@@ -46,6 +48,18 @@ export async function apiRequest<T>(
   const json = await response.json().catch(() => null);
 
   if (!response.ok) {
+    // If the token is invalid, expired, or forbidden, clear the stale session
+    if ((response.status === 401 || response.status === 403) && !endpoint.includes('/auth/login')) {
+      clearStoredSession();
+      if (
+        typeof window !== 'undefined' &&
+        window.location.pathname !== '/login' &&
+        window.location.pathname !== '/'
+      ) {
+        window.location.href = '/login?expired=true';
+      }
+    }
+
     const errorMsg = json?.error?.message || json?.message || `Request failed with status ${response.status}`;
     const err = new Error(errorMsg) as any;
     err.code = json?.error?.code || 'UNKNOWN_ERROR';
@@ -56,4 +70,3 @@ export async function apiRequest<T>(
 
   return json.data !== undefined ? json.data : json;
 }
-

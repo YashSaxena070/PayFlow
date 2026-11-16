@@ -5,6 +5,7 @@ import com.payflow.payment.domain.PaymentStatus;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public record PaymentResponse(
@@ -18,14 +19,19 @@ public record PaymentResponse(
         String idempotencyKey,
         List<PaymentAttemptResponse> attempts,
         String redirectUrl,
+        Map<String, Object> metadata,
         Instant createdAt,
         Instant updatedAt
 ) {
     public static PaymentResponse from(Payment payment) {
-        return from(payment, null);
+        return from(payment, null, Map.of());
     }
 
     public static PaymentResponse from(Payment payment, String redirectUrl) {
+        return from(payment, redirectUrl, Map.of());
+    }
+
+    public static PaymentResponse from(Payment payment, String redirectUrl, Map<String, Object> metadata) {
         List<PaymentAttemptResponse> attemptDtos = payment.getAttempts() != null
                 ? payment.getAttempts().stream().map(PaymentAttemptResponse::from).toList()
                 : List.of();
@@ -41,9 +47,9 @@ public record PaymentResponse(
                 payment.getIdempotencyKey(),
                 attemptDtos,
                 redirectUrl,
+                metadata != null ? metadata : Map.of(),
                 payment.getCreatedAt(),
                 payment.getUpdatedAt()
         );
     }
 }
-

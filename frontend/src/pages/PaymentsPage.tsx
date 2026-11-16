@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Filter, ChevronLeft, ChevronRight, RefreshCw, ExternalLink } from 'lucide-react';
 import { apiRequest } from '../services/api';
-import { Payment, PaymentStatus } from '../types';
+import { Payment } from '../types';
 import { StatusBadge } from '../components/StatusBadge';
 
 export const PaymentsPage: React.FC = () => {
@@ -51,39 +51,42 @@ export const PaymentsPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-300">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Transactions & Payments</h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Total {totalElements} payment attempts recorded for active tenant
+          <span className="text-xs font-semibold uppercase tracking-wider text-[#FF5A36] block mb-1">
+            TRANSACTIONS
+          </span>
+          <h1 className="text-3xl font-medium tracking-tight text-[#191816]">Payments & Attempts</h1>
+          <p className="text-sm text-[#78716C] mt-1">
+            Total {totalElements} payment attempts recorded across all gateways
           </p>
         </div>
 
         <button
           onClick={fetchPayments}
-          className="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition-colors"
+          className="p-2.5 rounded-full bg-white hover:bg-[#FAF7F2] text-[#57534E] border border-[#EBE6DD] transition-colors shadow-sm"
           title="Refresh"
         >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-emerald-400' : ''}`} />
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[#FF5A36]' : ''}`} />
         </button>
       </div>
 
       {/* Filter Bar */}
-      <div className="p-4 bg-slate-900 border border-slate-800 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
+      <div className="p-4 bg-white border border-[#EBE6DD] rounded-2xl shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
         <form onSubmit={handleSearch} className="relative w-full md:w-80">
-          <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+          <Search className="w-4 h-4 text-[#78716C] absolute left-3.5 top-3" />
           <input
             type="text"
             placeholder="Search Order ID..."
             value={orderSearch}
             onChange={(e) => setOrderSearch(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+            className="w-full bg-[#FAF7F2] border border-[#EBE6DD] rounded-xl pl-9 pr-4 py-2.5 text-xs text-[#191816] placeholder-[#A8A29E] focus:outline-none focus:border-[#FF5A36] font-medium"
           />
         </form>
 
         <div className="flex items-center space-x-3 w-full md:w-auto">
-          <div className="flex items-center space-x-1.5 text-xs text-slate-400">
+          <div className="flex items-center space-x-1.5 text-xs text-[#78716C]">
             <Filter className="w-3.5 h-3.5" />
             <span>Filter:</span>
           </div>
@@ -94,7 +97,7 @@ export const PaymentsPage: React.FC = () => {
               setStatusFilter(e.target.value);
               setPage(0);
             }}
-            className="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
+            className="bg-[#FAF7F2] border border-[#EBE6DD] rounded-xl px-3 py-2 text-xs text-[#191816] focus:outline-none focus:border-[#FF5A36] font-medium"
           >
             <option value="">All Statuses</option>
             <option value="SUCCEEDED">Succeeded</option>
@@ -111,21 +114,21 @@ export const PaymentsPage: React.FC = () => {
               setCurrencyFilter(e.target.value);
               setPage(0);
             }}
-            className="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
+            className="bg-[#FAF7F2] border border-[#EBE6DD] rounded-xl px-3 py-2 text-xs text-[#191816] focus:outline-none focus:border-[#FF5A36] font-medium"
           >
             <option value="">All Currencies</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="INR">INR</option>
+            <option value="USD">USD ($)</option>
+            <option value="EUR">EUR (€)</option>
+            <option value="INR">INR (₹)</option>
           </select>
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-white border border-[#EBE6DD] rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-300">
-            <thead className="bg-slate-950 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-800">
+          <table className="w-full text-left text-sm text-[#191816]">
+            <thead className="bg-[#FAF7F2] text-[#78716C] text-xs uppercase tracking-wider border-b border-[#EBE6DD] font-medium">
               <tr>
                 <th className="py-3.5 px-4">Order ID</th>
                 <th className="py-3.5 px-4">Amount</th>
@@ -136,10 +139,10 @@ export const PaymentsPage: React.FC = () => {
                 <th className="py-3.5 px-4 text-right">View</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-[#EBE6DD]">
               {payments.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-500 text-xs">
+                  <td colSpan={7} className="py-12 text-center text-[#78716C] text-xs">
                     No transactions match current filters.
                   </td>
                 </tr>
@@ -148,28 +151,28 @@ export const PaymentsPage: React.FC = () => {
                   <tr
                     key={p.id}
                     onClick={() => navigate(`/payments/${p.id}`)}
-                    className="hover:bg-slate-800/40 cursor-pointer transition-colors"
+                    className="hover:bg-[#FAF7F2]/80 cursor-pointer transition-colors"
                   >
-                    <td className="py-3.5 px-4 font-mono text-xs text-slate-200 font-medium">
+                    <td className="py-3.5 px-4 font-mono text-xs text-[#191816] font-medium">
                       {p.orderId}
                     </td>
-                    <td className="py-3.5 px-4 font-semibold text-white">
+                    <td className="py-3.5 px-4 font-medium text-[#191816]">
                       {(p.amountMinor / 100).toFixed(2)} {p.currency}
                     </td>
                     <td className="py-3.5 px-4">
                       <StatusBadge status={p.status} size="sm" />
                     </td>
-                    <td className="py-3.5 px-4 text-xs text-slate-400">
+                    <td className="py-3.5 px-4 text-xs text-[#57534E]">
                       {p.paymentMethod}
                     </td>
-                    <td className="py-3.5 px-4 text-xs font-mono text-slate-400">
+                    <td className="py-3.5 px-4 text-xs font-mono text-[#57534E] uppercase">
                       {p.attempts?.[0]?.providerCode || 'STRIPE'}
                     </td>
-                    <td className="py-3.5 px-4 text-xs text-slate-400">
+                    <td className="py-3.5 px-4 text-xs text-[#78716C]">
                       {new Date(p.createdAt).toLocaleString()}
                     </td>
                     <td className="py-3.5 px-4 text-right">
-                      <ExternalLink className="w-4 h-4 inline text-slate-500 hover:text-emerald-400" />
+                      <ExternalLink className="w-4 h-4 inline text-[#78716C] hover:text-[#FF5A36]" />
                     </td>
                   </tr>
                 ))
@@ -179,7 +182,7 @@ export const PaymentsPage: React.FC = () => {
         </div>
 
         {/* Pagination Bar */}
-        <div className="px-4 py-3 bg-slate-950 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+        <div className="px-4 py-3 bg-[#FAF7F2] border-t border-[#EBE6DD] flex items-center justify-between text-xs text-[#78716C]">
           <span>
             Page {page + 1} of {Math.max(1, totalPages)}
           </span>
@@ -187,14 +190,14 @@ export const PaymentsPage: React.FC = () => {
             <button
               disabled={page === 0}
               onClick={() => setPage((p) => Math.max(0, p - 1))}
-              className="p-1.5 rounded bg-slate-900 border border-slate-800 disabled:opacity-30 hover:bg-slate-800"
+              className="p-1.5 rounded-lg bg-white border border-[#EBE6DD] disabled:opacity-30 hover:bg-[#FAF7F2] text-[#191816]"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               disabled={page >= totalPages - 1}
               onClick={() => setPage((p) => p + 1)}
-              className="p-1.5 rounded bg-slate-900 border border-slate-800 disabled:opacity-30 hover:bg-slate-800"
+              className="p-1.5 rounded-lg bg-white border border-[#EBE6DD] disabled:opacity-30 hover:bg-[#FAF7F2] text-[#191816]"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -204,4 +207,3 @@ export const PaymentsPage: React.FC = () => {
     </div>
   );
 };
-

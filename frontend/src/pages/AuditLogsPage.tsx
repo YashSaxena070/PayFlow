@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ShieldCheck, RefreshCw, Eye } from 'lucide-react';
+import { RefreshCw, Eye } from 'lucide-react';
 import { apiRequest } from '../services/api';
 import { AuditLogDto } from '../types';
 
@@ -25,28 +25,31 @@ export const AuditLogsPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-300">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Immutable Audit Trail</h1>
-          <p className="text-sm text-slate-400 mt-1">
-            PCI DSS compliant append-only log with automatic sensitive data redaction
+          <span className="text-xs font-semibold uppercase tracking-wider text-[#FF5A36] block mb-1">
+            COMPLIANCE
+          </span>
+          <h1 className="text-3xl font-medium tracking-tight text-[#191816]">Immutable Audit Trail</h1>
+          <p className="text-sm text-[#78716C] mt-1">
+            PCI DSS compliant append-only ledger with sensitive data tokenization and redaction
           </p>
         </div>
 
         <button
           onClick={fetchLogs}
-          className="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition-colors"
+          className="p-2.5 rounded-full bg-white hover:bg-[#FAF7F2] text-[#57534E] border border-[#EBE6DD] transition-colors shadow-sm"
           title="Refresh"
         >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-emerald-400' : ''}`} />
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[#FF5A36]' : ''}`} />
         </button>
       </div>
 
-      <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-white border border-[#EBE6DD] rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-300">
-            <thead className="bg-slate-950 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-800">
+          <table className="w-full text-left text-sm text-[#191816]">
+            <thead className="bg-[#FAF7F2] text-[#78716C] text-xs uppercase tracking-wider border-b border-[#EBE6DD] font-medium">
               <tr>
                 <th className="py-3.5 px-4">Action</th>
                 <th className="py-3.5 px-4">Resource</th>
@@ -57,38 +60,38 @@ export const AuditLogsPage: React.FC = () => {
                 <th className="py-3.5 px-4 text-right">Payload</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-[#EBE6DD]">
               {logs.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-500 text-xs">
+                  <td colSpan={7} className="py-12 text-center text-[#78716C] text-xs">
                     No audit records found.
                   </td>
                 </tr>
               ) : (
                 logs.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-800/30">
-                    <td className="py-3.5 px-4 font-semibold text-emerald-400 text-xs font-mono">
+                  <tr key={log.id} className="hover:bg-[#FAF7F2]/80 transition-colors">
+                    <td className="py-3.5 px-4 font-semibold text-[#191816] text-xs font-mono">
                       {log.action}
                     </td>
-                    <td className="py-3.5 px-4 text-xs text-slate-300 font-medium">
+                    <td className="py-3.5 px-4 text-xs text-[#57534E] font-medium">
                       {log.resourceType}
                     </td>
-                    <td className="py-3.5 px-4 font-mono text-xs text-slate-400 truncate max-w-[120px]">
+                    <td className="py-3.5 px-4 font-mono text-xs text-[#78716C] truncate max-w-[120px]">
                       {log.resourceId}
                     </td>
-                    <td className="py-3.5 px-4 font-mono text-xs text-slate-400 truncate max-w-[100px]">
+                    <td className="py-3.5 px-4 font-mono text-xs text-[#78716C] truncate max-w-[100px]">
                       {log.actorId ? log.actorId.substring(0, 8) + '...' : 'System'}
                     </td>
-                    <td className="py-3.5 px-4 font-mono text-xs text-slate-500 truncate max-w-[120px]">
+                    <td className="py-3.5 px-4 font-mono text-xs text-[#78716C] truncate max-w-[120px]">
                       {log.correlationId}
                     </td>
-                    <td className="py-3.5 px-4 text-xs text-slate-400">
+                    <td className="py-3.5 px-4 text-xs text-[#78716C]">
                       {new Date(log.createdAt).toLocaleTimeString()}
                     </td>
                     <td className="py-3.5 px-4 text-right">
                       <button
                         onClick={() => setSelectedMeta(log.metadataRedacted)}
-                        className="text-xs text-slate-400 hover:text-white p-1"
+                        className="text-xs text-[#78716C] hover:text-[#FF5A36] p-1.5 rounded-lg hover:bg-[#FAF7F2] transition-colors"
                         title="View sanitized payload"
                       >
                         <Eye className="w-3.5 h-3.5 inline" />
@@ -103,16 +106,16 @@ export const AuditLogsPage: React.FC = () => {
       </div>
 
       {selectedMeta && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
-            <h3 className="font-semibold text-white">Sanitized Metadata Inspector</h3>
-            <pre className="p-3 bg-slate-950 rounded-lg text-xs font-mono text-emerald-400 overflow-x-auto max-h-60 border border-slate-800">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-[#EBE6DD] rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl animate-in zoom-in-95 duration-150">
+            <h3 className="font-semibold text-lg text-[#191816]">Sanitized Metadata Inspector</h3>
+            <pre className="p-4 bg-[#FAF7F2] rounded-2xl text-xs font-mono text-[#191816] overflow-x-auto max-h-60 border border-[#EBE6DD]">
               {JSON.stringify(JSON.parse(selectedMeta || '{}'), null, 2)}
             </pre>
             <div className="flex justify-end">
               <button
                 onClick={() => setSelectedMeta(null)}
-                className="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 text-xs font-medium"
+                className="px-5 py-2.5 rounded-full bg-[#111827] text-white hover:bg-black text-xs font-semibold"
               >
                 Close
               </button>
@@ -123,4 +126,3 @@ export const AuditLogsPage: React.FC = () => {
     </div>
   );
 };
-

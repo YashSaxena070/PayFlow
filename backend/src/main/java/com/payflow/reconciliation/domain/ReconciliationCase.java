@@ -1,5 +1,6 @@
 package com.payflow.reconciliation.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.payflow.payment.domain.Payment;
 import com.payflow.payment.domain.PaymentAttempt;
 import jakarta.persistence.*;
@@ -13,10 +14,12 @@ public class ReconciliationCase {
     @Id
     private UUID id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "payment_id", nullable = false)
     private Payment payment;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "attempt_id")
     private PaymentAttempt attempt;
@@ -60,12 +63,24 @@ public class ReconciliationCase {
         return id;
     }
 
+    @JsonIgnore
     public Payment getPayment() {
         return payment;
     }
 
+    @JsonIgnore
     public PaymentAttempt getAttempt() {
         return attempt;
+    }
+
+    @Transient
+    public UUID getPaymentId() {
+        return payment != null ? payment.getId() : null;
+    }
+
+    @Transient
+    public UUID getAttemptId() {
+        return attempt != null ? attempt.getId() : null;
     }
 
     public String getExpectedStatus() {

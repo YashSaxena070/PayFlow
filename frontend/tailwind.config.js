@@ -7,14 +7,26 @@ export default {
   theme: {
     extend: {
       colors: {
-        payflow: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          500: '#22c55e',
-          600: '#16a34a',
-          700: '#15803d',
-          900: '#14532d',
+        flux: {
+          cream: '#FAF7F2',
+          creamDarker: '#F3EFE8',
+          dark: '#181715',
+          darkCard: '#22201D',
+          coral: '#FF5A36',
+          coralHover: '#E84B29',
+          peach: '#FED7CA',
+          peachLight: '#FFE9E2',
+          lime: '#E2F899',
+          limeLight: '#EEFBC4',
+          card: '#FFFFFF',
+          textDark: '#191816',
+          textMuted: '#6B6864',
+          textLight: '#FAF7F2',
+          textLightMuted: '#A8A29E',
         }
+      },
+      fontFamily: {
+        sans: ['Plus Jakarta Sans', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
       }
     },
   },

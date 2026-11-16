@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Zap, ShieldCheck, ArrowRight, Lock, Mail } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { ShieldCheck, ArrowRight, Lock, Mail, ArrowLeft, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiRequest } from '../services/api';
 
@@ -41,7 +41,7 @@ export const LoginPage: React.FC = () => {
         token: data.token,
       });
 
-      navigate('/');
+      navigate('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Authentication failed. Please verify credentials.');
     } finally {
@@ -55,53 +55,68 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden">
-      {/* Background glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-[#FAF7F2] text-[#191816] flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden">
+      {/* Decorative background glow */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#FED7CA]/40 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="w-full max-w-md space-y-8 relative z-10">
+      <div className="w-full max-w-md space-y-6 relative z-10">
+        {/* Top return link & logo */}
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-500 text-slate-950 shadow-xl shadow-emerald-500/20 mb-4">
-            <Zap className="w-6 h-6 fill-current" />
+          <Link
+            to="/"
+            className="inline-flex items-center space-x-2 text-xs font-semibold text-[#78716C] hover:text-[#191816] mb-6 transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to Public Simulator</span>
+          </Link>
+
+          <div className="flex justify-center mb-2">
+            <span className="text-4xl font-extrabold tracking-tight text-[#191816]">FluxPay</span>
           </div>
-          <h2 className="text-2xl font-bold tracking-tight text-white">Sign in to PayFlow Console</h2>
-          <p className="mt-2 text-sm text-slate-400">Enterprise AI Payment Orchestration Platform</p>
+          <p className="text-sm font-medium text-[#78716C]">
+            Enterprise Multi-Gateway Orchestration Console
+          </p>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl backdrop-blur">
+        {/* Login Card */}
+        <div className="bg-white border border-[#EBE6DD] rounded-[28px] p-8 shadow-xl">
           {error && (
-            <div className="mb-6 p-4 rounded-lg bg-rose-950/60 border border-rose-800 text-rose-300 text-xs">
-              <p className="font-semibold text-rose-200">Login Failed</p>
+            <div className="mb-6 p-4 rounded-2xl bg-[#FED7CA]/60 border border-[#FCA5A5] text-[#991B1B] text-xs">
+              <p className="font-bold">Login Failed</p>
               <p className="mt-0.5">{error}</p>
             </div>
           )}
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Work Email</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#57534E] mb-1.5">
+                Work Email
+              </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                <Mail className="w-4 h-4 text-[#8A857D] absolute left-3.5 top-3.5" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition-colors"
+                  className="w-full bg-[#FAF7F2] border border-[#E2DDD5] rounded-xl pl-10 pr-4 py-3 text-sm text-[#191816] placeholder-[#A8A29E] focus:outline-none focus:border-[#FF5A36] transition-colors font-medium"
                   placeholder="name@company.com"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Password</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#57534E] mb-1.5">
+                Password
+              </label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                <Lock className="w-4 h-4 text-[#8A857D] absolute left-3.5 top-3.5" />
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition-colors"
+                  className="w-full bg-[#FAF7F2] border border-[#E2DDD5] rounded-xl pl-10 pr-4 py-3 text-sm text-[#191816] placeholder-[#A8A29E] focus:outline-none focus:border-[#FF5A36] transition-colors font-medium"
                   placeholder="••••••••••••"
                 />
               </div>
@@ -110,34 +125,37 @@ export const LoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-medium rounded-lg shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center space-x-2 text-sm"
+              className="w-full mt-2 py-3.5 px-6 bg-[#FF5A36] hover:bg-[#E84B29] disabled:opacity-50 text-white font-bold rounded-full shadow-lg shadow-[#FF5A36]/25 transition-all flex items-center justify-center space-x-2 text-sm"
             >
-              <span>{loading ? 'Authenticating...' : 'Sign In'}</span>
+              <span>{loading ? 'Authenticating...' : 'Sign In to Console'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
-          <div className="mt-8 pt-6 border-t border-slate-800">
-            <p className="text-xs text-slate-400 font-semibold mb-3">Quick Demo Accounts (Pre-seeded):</p>
+          {/* Quick Demo Accounts */}
+          <div className="mt-8 pt-6 border-t border-[#EBE6DD]">
+            <p className="text-[11px] text-[#78716C] uppercase font-bold tracking-wider mb-3">
+              Quick Demo Accounts (Pre-seeded):
+            </p>
             <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => setDemoCreds('admin@acme.com')}
-                className="px-2.5 py-1.5 text-xs bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded text-slate-300 hover:text-emerald-400 text-center transition-colors"
+                className="px-2 py-2 text-xs font-semibold bg-[#FAF7F2] hover:bg-[#FED7CA]/50 border border-[#E2DDD5] rounded-xl text-[#191816] text-center transition-colors"
               >
                 Acme Admin
               </button>
               <button
                 type="button"
                 onClick={() => setDemoCreds('operator@acme.com')}
-                className="px-2.5 py-1.5 text-xs bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded text-slate-300 hover:text-emerald-400 text-center transition-colors"
+                className="px-2 py-2 text-xs font-semibold bg-[#FAF7F2] hover:bg-[#FED7CA]/50 border border-[#E2DDD5] rounded-xl text-[#191816] text-center transition-colors"
               >
                 Operator
               </button>
               <button
                 type="button"
                 onClick={() => setDemoCreds('analyst@acme.com')}
-                className="px-2.5 py-1.5 text-xs bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded text-slate-300 hover:text-emerald-400 text-center transition-colors"
+                className="px-2 py-2 text-xs font-semibold bg-[#FAF7F2] hover:bg-[#FED7CA]/50 border border-[#E2DDD5] rounded-xl text-[#191816] text-center transition-colors"
               >
                 Analyst
               </button>
@@ -145,12 +163,12 @@ export const LoginPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center justify-center space-x-2 text-xs text-slate-500">
-          <ShieldCheck className="w-4 h-4 text-emerald-500/80" />
-          <span>PCI DSS Level 1 Scoped Architecture • Strict Multi-Tenancy</span>
+        {/* Security badge */}
+        <div className="flex items-center justify-center space-x-2 text-xs text-[#78716C]">
+          <ShieldCheck className="w-4 h-4 text-[#FF5A36]" />
+          <span>PCI-DSS Level 1 Scoped • Stripe, Razorpay, Cashfree, PayU, Adyen</span>
         </div>
       </div>
     </div>
   );
 };
-

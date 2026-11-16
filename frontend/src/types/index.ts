@@ -43,6 +43,7 @@ export interface Payment {
   idempotencyKey: string;
   attempts: PaymentAttempt[];
   redirectUrl?: string;
+  metadata?: Record<string, any>;
   createdAt: string;
   updatedAt: string;
 }

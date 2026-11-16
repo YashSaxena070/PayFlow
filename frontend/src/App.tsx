@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
 import { PaymentSimulatorModal } from './components/PaymentSimulatorModal';
+import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { PaymentsPage } from './pages/PaymentsPage';
@@ -18,19 +19,23 @@ import { SettingsPage } from './pages/SettingsPage';
 const ProtectedLayout: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const [simulatorOpen, setSimulatorOpen] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
   return (
-    <div className="flex h-screen bg-slate-950 overflow-hidden">
-      <Sidebar />
+    <div className="flex h-screen bg-[#FAF7F2] text-[#191816] overflow-hidden">
+      <Sidebar isOpen={mobileSidebarOpen} onClose={() => setMobileSidebarOpen(false)} />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <Navbar onOpenSimulator={() => setSimulatorOpen(true)} />
-        <main className="flex-1 overflow-y-auto p-8 max-w-7xl w-full mx-auto">
+        <Navbar
+          onOpenSimulator={() => setSimulatorOpen(true)}
+          onToggleSidebar={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+        />
+        <main className="flex-1 overflow-y-auto p-4 sm:p-8 max-w-7xl w-full mx-auto">
           <Routes>
-            <Route path="/" element={<DashboardPage onOpenSimulator={() => setSimulatorOpen(true)} />} />
+            <Route path="/dashboard" element={<DashboardPage onOpenSimulator={() => setSimulatorOpen(true)} />} />
             <Route path="/payments" element={<PaymentsPage />} />
             <Route path="/payments/:id" element={<PaymentDetailPage />} />
             <Route path="/providers" element={<ProvidersPage />} />
@@ -39,7 +44,7 @@ const ProtectedLayout: React.FC = () => {
             <Route path="/reconciliation" element={<ReconciliationPage />} />
             <Route path="/audit" element={<AuditLogsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </main>
       </div>
@@ -56,8 +61,9 @@ const ProtectedLayout: React.FC = () => {
 export const App: React.FC = () => {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/*" element={<ProtectedLayout />} />
         </Routes>
@@ -67,4 +73,3 @@ export const App: React.FC = () => {
 };
 
 export default App;
-

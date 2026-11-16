@@ -1,9 +1,9 @@
-# PayFlow Enterprise Operational Runbooks
+# FluxPay Enterprise Operational Runbooks
 
 ## Runbook 1: Ambiguous Timeout & Reconciliation Resolution
 
 ### Context
-When an external payment gateway experiences network instability or drops an in-flight socket connection, PayFlow marks the attempt `UNKNOWN` and the payment `PENDING`.
+When an external payment gateway experiences network instability or drops an in-flight socket connection, FluxPay marks the attempt `UNKNOWN` and the payment `PENDING`.
 
 ### Steps:
 1. Navigate to the **Reconciliation** tab in the Merchant Console (`/reconciliation`).

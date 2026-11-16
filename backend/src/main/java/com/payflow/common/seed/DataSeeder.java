@@ -129,7 +129,13 @@ public class DataSeeder implements CommandLineRunner {
         for (Merchant m : merchants) {
             for (Provider p : providers) {
                 if (merchantProviderConfigRepository.findByMerchantIdAndProviderId(m.getId(), p.getId()).isEmpty()) {
-                    int priority = "stripe".equalsIgnoreCase(p.getCode()) ? 1 : 2;
+                    int priority = switch (p.getCode().toLowerCase()) {
+                        case "stripe" -> 1;
+                        case "razorpay" -> 2;
+                        case "cashfree" -> 3;
+                        case "payu" -> 4;
+                        default -> 5;
+                    };
                     merchantProviderConfigRepository.save(new MerchantProviderConfig(
                             UUID.randomUUID(), m, p, true, priority, 100
                     ));

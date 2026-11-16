@@ -115,7 +115,7 @@ public class PaymentService {
 
         // 4. Select Route via Routing Engine
         RoutingDecision routingDecision = routingService.selectProvider(
-                merchantId, payment.getCurrency(), payment.getPaymentMethod(), payment.getAmountMinor());
+                merchantId, payment.getCurrency(), payment.getPaymentMethod(), payment.getAmountMinor(), request.preferredProvider());
         Provider provider = routingDecision.selectedProvider();
 
         // 5. Create Payment Attempt (attempt #1)
@@ -195,7 +195,7 @@ public class PaymentService {
         );
 
         // 10. Record in Idempotency Store
-        PaymentResponse response = PaymentResponse.from(payment, result.redirectUrl());
+        PaymentResponse response = PaymentResponse.from(payment, result.redirectUrl(), result.metadata());
         try {
             String responseJson = objectMapper.writeValueAsString(response);
             idempotencyService.recordSuccess(
@@ -252,5 +252,35 @@ public class PaymentService {
                 .stream()
                 .map(PaymentAttemptResponse::from)
                 .toList();
+    }
+
+    @Transactional
+    public PaymentResponse syncPaymentStatus(UUID merchantId, UUID paymentId) {
+        Payment payment = paymentRepository.findByIdAndMerchantId(paymentId, merchantId)
+                .orElseThrow(() -> new PayflowException(ErrorCode.RESOURCE_NOT_FOUND, "Payment not found: " + paymentId));
+
+        List<PaymentAttempt> attempts = paymentAttemptRepository.findAllByPaymentIdOrderByAttemptNumberAsc(paymentId);
+        if (!attempts.isEmpty()) {
+            PaymentAttempt latestAttempt = attempts.get(attempts.size() - 1);
+            if (latestAttempt.getProviderReference() != null && latestAttempt.getProvider() != null) {
+                PaymentProviderPort adapter = providerRegistry.getProvider(latestAttempt.getProvider().getCode());
+                PaymentProviderPort.ProviderPaymentStatus providerStatus = adapter.getPaymentStatus(latestAttempt.getProviderReference());
+                if (providerStatus != null && providerStatus.status() != null && providerStatus.status() != latestAttempt.getStatus()) {
+                    latestAttempt.setStatus(providerStatus.status());
+                    if (providerStatus.status().isTerminal()) {
+                        latestAttempt.setCompletedAt(Instant.now());
+                    }
+                    paymentAttemptRepository.save(latestAttempt);
+
+                    switch (providerStatus.status()) {
+                        case SUCCEEDED -> payment.setStatus(PaymentStatus.SUCCEEDED);
+                        case FAILED -> payment.setStatus(PaymentStatus.FAILED);
+                        default -> {}
+                    }
+                    payment = paymentRepository.save(payment);
+                }
+            }
+        }
+        return PaymentResponse.from(payment);
     }
 }

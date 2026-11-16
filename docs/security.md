@@ -1,8 +1,8 @@
-# PayFlow Security & Multi-Tenant Isolation Architecture
+# FluxPay Security & Multi-Tenant Isolation Architecture
 
 ## 1. Zero Raw Cardholder Data Policy (PCI DSS Scoped)
 
-PayFlow strictly operates as an orchestration gateway:
+FluxPay strictly operates as an orchestration gateway:
 - Raw primary account numbers (PAN), CVVs, and magnetic stripe tracks **are never ingested, logged, or persisted**.
 - All card numbers in simulator requests are mocked or tokenized.
 - Audit logs and request tracing filters automatically strip and redact keys containing sensitive words (`cvv`, `password`, `pan`, `secret`, `key`, `apiKey`, `token`).

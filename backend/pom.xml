@@ -11,8 +11,8 @@
 	<groupId>com.payflow</groupId>
 	<artifactId>payflow-backend</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
-	<name>payflow-backend</name>
-	<description>PayFlow Enterprise Payment Orchestration Platform Backend</description>
+	<name>fluxpay-backend</name>
+	<description>FluxPay Enterprise Payment Orchestration Platform Backend</description>
 
 	<properties>
 		<java.version>21</java.version>
@@ -82,6 +82,10 @@
 
 		<!-- Caching & Messaging -->
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka</artifactId>
 			<version>${spring-kafka.version}</version>
@@ -121,6 +125,18 @@
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
 			<version>${springdoc.version}</version>
+		</dependency>
+
+		<!-- Payment Gateway SDKs -->
+		<dependency>
+			<groupId>com.stripe</groupId>
+			<artifactId>stripe-java</artifactId>
+			<version>31.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.razorpay</groupId>
+			<artifactId>razorpay-java</artifactId>
+			<version>1.4.6</version>
 		</dependency>
 
 		<!-- Testing -->

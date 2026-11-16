@@ -54,6 +54,16 @@ public class RoutingService {
 
     @Transactional(readOnly = true)
     public RoutingDecision selectProvider(UUID merchantId, String currency, String paymentMethod, Long amountMinor) {
+        return selectProvider(merchantId, currency, paymentMethod, amountMinor, null);
+    }
+
+    @Transactional(readOnly = true)
+    public RoutingDecision selectProvider(
+            UUID merchantId,
+            String currency,
+            String paymentMethod,
+            Long amountMinor,
+            String preferredProvider) {
         List<MerchantProviderConfig> configs = merchantProviderConfigRepository.findEnabledByMerchantIdOrdered(merchantId);
 
         if (configs.isEmpty()) {
@@ -67,6 +77,31 @@ public class RoutingService {
                 }
             } else {
                 throw new PayflowException(ErrorCode.PROVIDER_UNAVAILABLE, "No enabled payment providers configured for this merchant");
+            }
+        }
+
+        // Direct explicit provider override (e.g. from developer simulator or API header)
+        if (preferredProvider != null && !preferredProvider.isBlank() && !"AUTO".equalsIgnoreCase(preferredProvider.trim())) {
+            String targetCode = preferredProvider.trim().toLowerCase();
+            for (MerchantProviderConfig config : configs) {
+                if (config.getProvider().getCode().equalsIgnoreCase(targetCode)) {
+                    return new RoutingDecision(
+                            config.getProvider(),
+                            "EXPLICIT_OVERRIDE",
+                            "Directly routed to " + config.getProvider().getDisplayName() + " per request configuration.",
+                            1
+                    );
+                }
+            }
+            Optional<PaymentProviderPort> adapterOpt = providerRegistry.findProvider(targetCode);
+            if (adapterOpt.isPresent()) {
+                Provider directProvider = new Provider(UUID.randomUUID(), targetCode, targetCode.toUpperCase() + " Gateway", true);
+                return new RoutingDecision(
+                        directProvider,
+                        "EXPLICIT_OVERRIDE",
+                        "Directly routed to " + targetCode.toUpperCase() + " per request configuration.",
+                        1
+                );
             }
         }
 
@@ -121,12 +156,34 @@ public class RoutingService {
             return new RoutingDecision(chosen.getProvider(), "WEIGHTED", explanation, activeRule.get().getVersion());
         }
 
+        // Domestic Currency Smart Prioritization:
+        // When currency is INR, prioritize domestic Indian gateways (Razorpay, Cashfree, PayU)
+        if ("INR".equalsIgnoreCase(currency)) {
+            eligible.sort((a, b) -> {
+                int rankA = getInrRank(a.getProvider().getCode().toLowerCase());
+                int rankB = getInrRank(b.getProvider().getCode().toLowerCase());
+                if (rankA != rankB) return Integer.compare(rankA, rankB);
+                return Integer.compare(a.getPriority(), b.getPriority());
+            });
+        }
+
         // Default: Deterministic Priority routing
         MerchantProviderConfig chosen = eligible.get(0);
         String explanation = String.format("Selected [%s] via priority routing (priority %d). %s",
                 chosen.getProvider().getCode(), chosen.getPriority(), formatFiltered(filterReasons));
 
         return new RoutingDecision(chosen.getProvider(), "PRIORITY", explanation.trim(), 1);
+    }
+
+    private int getInrRank(String code) {
+        return switch (code) {
+            case "razorpay" -> 1;
+            case "cashfree" -> 2;
+            case "payu" -> 3;
+            case "adyen" -> 4;
+            case "stripe" -> 5;
+            default -> 6;
+        };
     }
 
     private MerchantProviderConfig pickWeighted(List<MerchantProviderConfig> configs) {

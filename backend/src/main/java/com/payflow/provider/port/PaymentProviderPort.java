@@ -15,6 +15,10 @@ public interface PaymentProviderPort {
 
     ProviderPaymentStatus getPaymentStatus(String providerReference);
 
+    default ProviderCancelResult cancelPayment(String providerReference) {
+        return new ProviderCancelResult(providerReference, false, "NOT_SUPPORTED", "Provider does not support cancellation");
+    }
+
     ProviderRefundResult refund(ProviderRefundCommand command);
 
     boolean verifyWebhook(Map<String, String> headers, String rawBody);
@@ -45,7 +49,25 @@ public interface PaymentProviderPort {
             String failureCode,
             String failureMessageSafe,
             String redirectUrl,
-            String rawSummary
+            String rawSummary,
+            Map<String, Object> metadata
+    ) {
+        public InitiatePaymentResult(
+                String providerReference,
+                AttemptStatus status,
+                String failureCode,
+                String failureMessageSafe,
+                String redirectUrl,
+                String rawSummary) {
+            this(providerReference, status, failureCode, failureMessageSafe, redirectUrl, rawSummary, Map.of());
+        }
+    }
+
+    record ProviderCancelResult(
+            String providerReference,
+            boolean success,
+            String failureCode,
+            String failureMessage
     ) {}
 
     record ProviderPaymentStatus(

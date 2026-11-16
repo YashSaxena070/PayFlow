@@ -1,12 +1,12 @@
-# PayFlow Enterprise Architecture Guide
+# FluxPay Enterprise Architecture Guide
 
 ## 1. System Overview
 
-PayFlow Enterprise is an enterprise-grade multi-tenant payment orchestration platform designed to route, process, reconcile, and audit payments across multiple global payment providers (e.g. Stripe, Adyen).
+FluxPay Enterprise is an enterprise-grade multi-tenant payment orchestration platform designed to route, process, reconcile, and audit payments across multiple global payment providers (e.g. Stripe, Razorpay, PayU, Cashfree).
 
 ```mermaid
 flowchart TD
-    Client[Merchant Client / React Console] -->|HTTPS + JWT / API Key| Gateway[PayFlow Gateway & Security Filters]
+    Client[Merchant Client / React Console] -->|HTTPS + JWT / API Key| Gateway[FluxPay Gateway & Security Filters]
     Gateway --> Auth[Identity & Tenancy Scoping]
     Auth --> Idemp[Distributed Idempotency Engine]
     Idemp --> PaymentSvc[Payment Orchestration Service]

@@ -82,5 +82,12 @@ public class PaymentController {
         List<PaymentAttemptResponse> attempts = paymentService.getAttempts(merchantId, paymentId);
         return ResponseEntity.ok(ApiResponse.of(attempts, CorrelationIdContext.get()));
     }
+
+    @PostMapping("/{paymentId}/sync")
+    public ResponseEntity<ApiResponse<PaymentResponse>> syncPayment(@PathVariable UUID paymentId) {
+        UUID merchantId = getMerchantId();
+        PaymentResponse response = paymentService.syncPaymentStatus(merchantId, paymentId);
+        return ResponseEntity.ok(ApiResponse.of(response, CorrelationIdContext.get()));
+    }
 }
 

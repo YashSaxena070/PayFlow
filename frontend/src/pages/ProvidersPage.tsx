@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Layers, ShieldCheck, Check, Save, AlertCircle, RefreshCw } from 'lucide-react';
+import { Layers, Check, Save, AlertCircle, RefreshCw } from 'lucide-react';
 import { apiRequest } from '../services/api';
 import { ProviderDto } from '../types';
 
@@ -61,35 +61,38 @@ export const ProvidersPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-300">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Payment Gateways & Providers</h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Manage provider enablement, priority ranking, and traffic split weights
+          <span className="text-xs font-semibold uppercase tracking-wider text-[#FF5A36] block mb-1">
+            GATEWAYS
+          </span>
+          <h1 className="text-3xl font-medium tracking-tight text-[#191816]">Integrated Providers</h1>
+          <p className="text-sm text-[#78716C] mt-1">
+            Manage provider enablement, priority ranking, and traffic split weights across 5 gateways
           </p>
         </div>
 
         <button
           onClick={fetchProviders}
-          className="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition-colors"
+          className="p-2.5 rounded-full bg-white hover:bg-[#FAF7F2] text-[#57534E] border border-[#EBE6DD] transition-colors shadow-sm"
           title="Refresh"
         >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-emerald-400' : ''}`} />
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[#FF5A36]' : ''}`} />
         </button>
       </div>
 
       {successMsg && (
-        <div className="p-3 bg-emerald-950/60 border border-emerald-800 rounded-lg text-emerald-300 text-xs flex items-center space-x-2">
+        <div className="p-3.5 bg-[#E2F899] border border-[#D4EE7F] rounded-2xl text-[#2C410F] text-xs flex items-center space-x-2">
           <Check className="w-4 h-4" />
-          <span>{successMsg}</span>
+          <span className="font-medium">{successMsg}</span>
         </div>
       )}
 
       {error && (
-        <div className="p-3 bg-rose-950/60 border border-rose-800 rounded-lg text-rose-300 text-xs flex items-center space-x-2">
+        <div className="p-3.5 bg-[#FED7CA]/60 border border-[#FCA5A5] rounded-2xl text-[#991B1B] text-xs flex items-center space-x-2">
           <AlertCircle className="w-4 h-4" />
-          <span>{error}</span>
+          <span className="font-medium">{error}</span>
         </div>
       )}
 
@@ -100,16 +103,16 @@ export const ProvidersPage: React.FC = () => {
           return (
             <div
               key={p.id}
-              className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-sm space-y-5"
+              className="bg-white border border-[#EBE6DD] rounded-2xl p-6 shadow-sm space-y-5"
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-center font-bold text-white">
-                    {p.code.substring(0, 2)}
+                <div className="flex items-center space-x-3.5">
+                  <div className="w-11 h-11 rounded-2xl bg-[#FAF7F2] border border-[#EBE6DD] flex items-center justify-center font-bold text-sm text-[#191816]">
+                    {p.code.substring(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-white">{p.displayName}</h3>
-                    <p className="text-xs text-slate-500 font-mono">Adapter: {p.code.toLowerCase()}</p>
+                    <h3 className="font-semibold text-base text-[#191816]">{p.displayName}</h3>
+                    <p className="text-xs text-[#78716C] font-mono">Adapter: {p.code.toLowerCase()}</p>
                   </div>
                 </div>
 
@@ -125,26 +128,26 @@ export const ProvidersPage: React.FC = () => {
                     }
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                  <div className="w-11 h-6 bg-[#EBE6DD] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#FF5A36]"></div>
                 </label>
               </div>
 
               {/* Capabilities */}
               <div className="space-y-2 text-xs">
-                <span className="text-slate-500 font-medium">Capabilities:</span>
+                <span className="text-[#78716C] font-medium">Capabilities:</span>
                 <div className="flex flex-wrap gap-1.5">
                   {p.supports3DS && (
-                    <span className="px-2 py-0.5 rounded bg-slate-950 text-slate-300 border border-slate-800">
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#FAF7F2] text-[#57534E] border border-[#EBE6DD] font-medium">
                       3D Secure 2.0
                     </span>
                   )}
                   {p.supportsRefunds && (
-                    <span className="px-2 py-0.5 rounded bg-slate-950 text-slate-300 border border-slate-800">
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#FAF7F2] text-[#57534E] border border-[#EBE6DD] font-medium">
                       Refunds API
                     </span>
                   )}
                   {p.supportsWebhooks && (
-                    <span className="px-2 py-0.5 rounded bg-slate-950 text-slate-300 border border-slate-800">
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#FAF7F2] text-[#57534E] border border-[#EBE6DD] font-medium">
                       Webhooks
                     </span>
                   )}
@@ -152,12 +155,12 @@ export const ProvidersPage: React.FC = () => {
               </div>
 
               {/* Currencies & Methods */}
-              <div className="grid grid-cols-2 gap-4 text-xs pt-2 border-t border-slate-800/80">
+              <div className="grid grid-cols-2 gap-4 text-xs pt-2 border-t border-[#EBE6DD]">
                 <div>
-                  <span className="text-slate-500 block mb-1">Currencies:</span>
+                  <span className="text-[#78716C] font-medium block mb-1">Currencies:</span>
                   <div className="flex flex-wrap gap-1">
                     {p.supportedCurrencies.map((c) => (
-                      <span key={c} className="font-mono text-[11px] text-slate-300">
+                      <span key={c} className="font-mono text-[11px] font-semibold text-[#191816] bg-[#FAF7F2] px-2 py-0.5 rounded-md border border-[#EBE6DD]">
                         {c}
                       </span>
                     ))}
@@ -165,10 +168,10 @@ export const ProvidersPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <span className="text-slate-500 block mb-1">Methods:</span>
+                  <span className="text-[#78716C] font-medium block mb-1">Methods:</span>
                   <div className="flex flex-wrap gap-1">
                     {p.supportedMethods.map((m) => (
-                      <span key={m} className="font-mono text-[11px] text-slate-300">
+                      <span key={m} className="font-mono text-[11px] font-semibold text-[#191816] bg-[#FAF7F2] px-2 py-0.5 rounded-md border border-[#EBE6DD]">
                         {m}
                       </span>
                     ))}
@@ -177,9 +180,9 @@ export const ProvidersPage: React.FC = () => {
               </div>
 
               {/* Routing Priority & Weight Inputs */}
-              <div className="grid grid-cols-2 gap-4 pt-3 border-t border-slate-800/80">
+              <div className="grid grid-cols-2 gap-4 pt-3 border-t border-[#EBE6DD]">
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1">
+                  <label className="block text-xs font-semibold text-[#57534E] mb-1">
                     Routing Priority (1 = Top)
                   </label>
                   <input
@@ -193,13 +196,13 @@ export const ProvidersPage: React.FC = () => {
                         [p.id]: { ...edit, priority: parseInt(e.target.value) || 1 },
                       })
                     }
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-[#FAF7F2] border border-[#EBE6DD] rounded-xl px-3 py-2 text-xs text-[#191816] focus:outline-none focus:border-[#FF5A36] font-medium"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1">
-                    Weighted Traffic Split (0-1000)
+                  <label className="block text-xs font-semibold text-[#57534E] mb-1">
+                    Traffic Weight (0-1000)
                   </label>
                   <input
                     type="number"
@@ -212,7 +215,7 @@ export const ProvidersPage: React.FC = () => {
                         [p.id]: { ...edit, weight: parseInt(e.target.value) || 0 },
                       })
                     }
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-[#FAF7F2] border border-[#EBE6DD] rounded-xl px-3 py-2 text-xs text-[#191816] focus:outline-none focus:border-[#FF5A36] font-medium"
                   />
                 </div>
               </div>
@@ -220,7 +223,7 @@ export const ProvidersPage: React.FC = () => {
               <button
                 onClick={() => handleSave(p.id)}
                 disabled={savingId === p.id}
-                className="w-full py-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-200 hover:text-white rounded-lg text-xs font-medium transition-colors flex items-center justify-center space-x-1.5"
+                className="w-full py-2.5 bg-[#111827] hover:bg-black disabled:opacity-50 text-white rounded-full text-xs font-semibold transition-colors flex items-center justify-center space-x-1.5 shadow-sm"
               >
                 <Save className="w-3.5 h-3.5" />
                 <span>{savingId === p.id ? 'Saving Changes...' : 'Save Configuration'}</span>
@@ -232,4 +235,3 @@ export const ProvidersPage: React.FC = () => {
     </div>
   );
 };
-

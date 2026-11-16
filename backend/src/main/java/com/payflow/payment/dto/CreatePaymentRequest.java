@@ -23,6 +23,18 @@ public record CreatePaymentRequest(
 
         String returnUrl,
 
-        String testScenario
-) {}
+        String testScenario,
+
+        String preferredProvider
+) {
+    public CreatePaymentRequest(
+            String orderId,
+            Long amountMinor,
+            String currency,
+            String paymentMethod,
+            String returnUrl,
+            String testScenario) {
+        this(orderId, amountMinor, currency, paymentMethod, returnUrl, testScenario, null);
+    }
+}
 

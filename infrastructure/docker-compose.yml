@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: payflow-postgres
+    container_name: fluxpay-postgres
     environment:
       POSTGRES_DB: payflow
       POSTGRES_USER: payflow_user
@@ -16,11 +16,11 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - payflow-net
+      - fluxpay-net
 
   redis:
     image: redis:7-alpine
-    container_name: payflow-redis
+    container_name: fluxpay-redis
     ports:
       - "${REDIS_PORT:-6380}:6379"
     healthcheck:
@@ -29,11 +29,11 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - payflow-net
+      - fluxpay-net
 
   kafka:
     image: confluentinc/cp-kafka:7.6.0
-    container_name: payflow-kafka
+    container_name: fluxpay-kafka
     ports:
       - "9094:9092"
     environment:
@@ -58,13 +58,13 @@ services:
       retries: 5
       start_period: 25s
     networks:
-      - payflow-net
+      - fluxpay-net
 
   backend:
     build:
       context: ../backend
       dockerfile: Dockerfile
-    container_name: payflow-backend
+    container_name: fluxpay-backend
     ports:
       - "8080:8080"
     environment:
@@ -75,6 +75,18 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      STRIPE_API_KEY: ${STRIPE_API_KEY:-sk_test_payflow_stripe_dummy}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_test_stripe_secret_12345}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-rzp_test_payflow_dummy}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-rzp_secret_dummy}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:-whsec_test_razorpay_secret_12345}
+      PAYU_KEY: ${PAYU_KEY:-test_payu_merchant_key}
+      PAYU_SALT: ${PAYU_SALT:-test_payu_merchant_salt}
+      PAYU_BASE_URL: ${PAYU_BASE_URL:-https://test.payu.in}
+      CASHFREE_APP_ID: ${CASHFREE_APP_ID:-TEST_CF_APP_ID_DUMMY}
+      CASHFREE_SECRET_KEY: ${CASHFREE_SECRET_KEY:-cf_secret_key_dummy}
+      CASHFREE_API_VERSION: ${CASHFREE_API_VERSION:-2023-08-01}
+      CASHFREE_BASE_URL: ${CASHFREE_BASE_URL:-https://sandbox.cashfree.com/pg}
     depends_on:
       postgres:
         condition: service_healthy
@@ -83,46 +95,46 @@ services:
       kafka:
         condition: service_healthy
     networks:
-      - payflow-net
+      - fluxpay-net
 
   frontend:
     build:
       context: ../frontend
       dockerfile: Dockerfile
-    container_name: payflow-frontend
+    container_name: fluxpay-frontend
     ports:
       - "3000:80"
     depends_on:
       - backend
     networks:
-      - payflow-net
+      - fluxpay-net
 
   prometheus:
     image: prom/prometheus:v2.51.0
-    container_name: payflow-prometheus
+    container_name: fluxpay-prometheus
     profiles: ["observability"]
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
     networks:
-      - payflow-net
+      - fluxpay-net
 
   grafana:
     image: grafana/grafana:10.4.0
-    container_name: payflow-grafana
+    container_name: fluxpay-grafana
     profiles: ["observability"]
     ports:
       - "3001:3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     networks:
-      - payflow-net
+      - fluxpay-net
 
 volumes:
   postgres_data:
 
 networks:
-  payflow-net:
+  fluxpay-net:
     driver: bridge
 
