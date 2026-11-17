@@ -96,16 +96,31 @@ public class DotenvEnvironmentPostProcessor implements EnvironmentPostProcessor 
                     String path = uri.getPath();
                     String query = uri.getQuery();
 
-                    String jdbcUrl = "jdbc:postgresql://" + host + ":" + port + (path != null ? path : "/payflow")
-                            + (query != null ? "?" + query : "");
+                    StringBuilder jdbcUrl = new StringBuilder("jdbc:postgresql://")
+                            .append(host).append(":").append(port)
+                            .append(path != null && !path.isBlank() ? path : "/payflow");
 
-                    props.put("spring.datasource.url", jdbcUrl);
+                    if (query != null && !query.isBlank()) {
+                        jdbcUrl.append("?").append(query);
+                        if (!query.contains("sslmode=")) {
+                            jdbcUrl.append("&sslmode=require");
+                        }
+                    } else {
+                        jdbcUrl.append("?sslmode=require");
+                    }
+
+                    String finalJdbcUrl = jdbcUrl.toString();
+                    props.put("DATABASE_URL", finalJdbcUrl);
+                    props.put("spring.datasource.url", finalJdbcUrl);
+                    props.put("DATABASE_DRIVER", "org.postgresql.Driver");
                     props.put("spring.datasource.driver-class-name", "org.postgresql.Driver");
 
                     if (uri.getUserInfo() != null) {
                         String[] userPass = uri.getUserInfo().split(":", 2);
+                        props.put("DATABASE_USERNAME", userPass[0]);
                         props.put("spring.datasource.username", userPass[0]);
                         if (userPass.length > 1) {
+                            props.put("DATABASE_PASSWORD", userPass[1]);
                             props.put("spring.datasource.password", userPass[1]);
                         }
                     }
@@ -115,6 +130,9 @@ public class DotenvEnvironmentPostProcessor implements EnvironmentPostProcessor 
                     log.error("Failed to parse Cloud DATABASE_URL: {}", e.getMessage());
                 }
             } else if (dbUrl.startsWith("jdbc:postgresql:")) {
+                props.put("DATABASE_URL", dbUrl);
+                props.put("spring.datasource.url", dbUrl);
+                props.put("DATABASE_DRIVER", "org.postgresql.Driver");
                 props.put("spring.datasource.driver-class-name", "org.postgresql.Driver");
             }
         } else {
@@ -124,12 +142,18 @@ public class DotenvEnvironmentPostProcessor implements EnvironmentPostProcessor 
 
             if (localPgUp) {
                 log.info("Local PostgreSQL instance detected on 127.0.0.1:5432. Connecting to PostgreSQL.");
+                props.put("DATABASE_DRIVER", "org.postgresql.Driver");
                 props.put("spring.datasource.driver-class-name", "org.postgresql.Driver");
             } else {
                 log.warn("No remote DATABASE_URL configured and 127.0.0.1:5432 is unreachable. Seamlessly activating embedded in-memory PostgreSQL engine so application starts healthy!");
-                props.put("spring.datasource.url", "jdbc:h2:mem:payflowdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH");
+                String h2Url = "jdbc:h2:mem:payflowdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH";
+                props.put("DATABASE_URL", h2Url);
+                props.put("spring.datasource.url", h2Url);
+                props.put("DATABASE_DRIVER", "org.h2.Driver");
                 props.put("spring.datasource.driver-class-name", "org.h2.Driver");
+                props.put("DATABASE_USERNAME", "sa");
                 props.put("spring.datasource.username", "sa");
+                props.put("DATABASE_PASSWORD", "");
                 props.put("spring.datasource.password", "");
             }
         }
