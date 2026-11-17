@@ -1,0 +1,39 @@
+# ============================================================
+# Render.com Cloud Deployment Profile
+# ============================================================
+# Activate by setting SPRING_PROFILES_ACTIVE=render on Render.
+#
+# When DATABASE_URL is set to a Render/Neon/Supabase Postgres
+# connection string the DotenvEnvironmentPostProcessor will
+# normalize it into a JDBC URL automatically.
+#
+# When no external DATABASE_URL is configured, this profile
+# boots the app against an embedded H2 in PostgreSQL-compat
+# mode so the service starts healthy even without a database.
+# ============================================================
+
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:h2:mem:payflowdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH}
+    username: ${DATABASE_USERNAME:sa}
+    password: ${DATABASE_PASSWORD:}
+    driver-class-name: ${DATABASE_DRIVER:org.h2.Driver}
+  jpa:
+    hibernate:
+      ddl-auto: update
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+
+payflow:
+  kafka:
+    enabled: false
+    listener:
+      enabled: false
+

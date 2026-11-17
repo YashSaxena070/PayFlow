@@ -22,4 +22,6 @@ EXPOSE 8080
 HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=3 \
   CMD wget -q --spider http://localhost:8080/api/v1/health/live || exit 1
 
+ENV SPRING_PROFILES_ACTIVE=render
+
 ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]
