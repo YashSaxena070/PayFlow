@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-@Profile({"local", "test", "docker"})
+@Profile({"local", "test", "docker", "render"})
 public class DataSeeder implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DataSeeder.class);
