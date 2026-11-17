@@ -146,6 +146,12 @@ export interface AnalyticsOverview {
     failedAttempts: number;
     successRatePercent: number;
   }>;
+  baselineFailureRatePercent?: number;
+  orchestratedFailureRatePercent?: number;
+  failureRateReductionPercent?: number;
+  averageLatencyMs?: number;
+  latencyReductionPercent?: number;
+  rescuedVolumeMinor?: number;
 }
 
 export interface UserSession {

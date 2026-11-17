@@ -148,12 +148,15 @@ public class RoutingService {
         List<RoutingRule> rules = routingRuleRepository.findAllByMerchantIdOrderByPriorityAsc(merchantId);
         Optional<RoutingRule> activeRule = rules.stream().filter(RoutingRule::isEnabled).findFirst();
 
+        // Build cascading fallback chain of eligible providers
+        List<Provider> fallbackChain = eligible.stream().map(MerchantProviderConfig::getProvider).toList();
+
         if (activeRule.isPresent() && "WEIGHTED".equalsIgnoreCase(activeRule.get().getStrategy())) {
             MerchantProviderConfig chosen = pickWeighted(eligible);
             String explanation = String.format("Selected [%s] via weighted routing rule '%s' (weight %d/%d). %s",
                     chosen.getProvider().getCode(), activeRule.get().getName(), chosen.getWeight(),
                     totalWeight(eligible), formatFiltered(filterReasons));
-            return new RoutingDecision(chosen.getProvider(), "WEIGHTED", explanation, activeRule.get().getVersion());
+            return new RoutingDecision(chosen.getProvider(), "WEIGHTED", explanation, activeRule.get().getVersion(), fallbackChain);
         }
 
         // Domestic Currency Smart Prioritization:
@@ -165,6 +168,7 @@ public class RoutingService {
                 if (rankA != rankB) return Integer.compare(rankA, rankB);
                 return Integer.compare(a.getPriority(), b.getPriority());
             });
+            fallbackChain = eligible.stream().map(MerchantProviderConfig::getProvider).toList();
         }
 
         // Default: Deterministic Priority routing
@@ -172,7 +176,7 @@ public class RoutingService {
         String explanation = String.format("Selected [%s] via priority routing (priority %d). %s",
                 chosen.getProvider().getCode(), chosen.getPriority(), formatFiltered(filterReasons));
 
-        return new RoutingDecision(chosen.getProvider(), "PRIORITY", explanation.trim(), 1);
+        return new RoutingDecision(chosen.getProvider(), "PRIORITY", explanation.trim(), 1, fallbackChain);
     }
 
     private int getInrRank(String code) {

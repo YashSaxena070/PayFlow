@@ -129,12 +129,17 @@ public class CashfreeAdapter implements PaymentProviderPort {
             String cfOrderId = root.path("cf_order_id").asText();
             String paymentSessionId = root.path("payment_session_id").asText();
             String paymentUrl = root.path("payments").path("url").asText(null);
+            if (paymentUrl == null || paymentUrl.isBlank()) {
+                if (paymentSessionId != null && !paymentSessionId.isBlank()) {
+                    paymentUrl = "https://payments-test.cashfree.com/forms/" + paymentSessionId;
+                }
+            }
 
-            Map<String, Object> metadata = Map.of(
-                    "cfOrderId", cfOrderId,
-                    "paymentSessionId", paymentSessionId,
-                    "orderStatus", root.path("order_status").asText("ACTIVE")
-            );
+            Map<String, Object> metadata = new java.util.HashMap<>();
+            metadata.put("provider", "cashfree");
+            metadata.put("cfOrderId", cfOrderId);
+            metadata.put("paymentSessionId", paymentSessionId);
+            metadata.put("orderStatus", root.path("order_status").asText("ACTIVE"));
 
             return new InitiatePaymentResult(
                     cfOrderId,

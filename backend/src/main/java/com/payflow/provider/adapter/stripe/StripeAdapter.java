@@ -79,20 +79,24 @@ public class StripeAdapter implements PaymentProviderPort {
                     .setIdempotencyKey(command.paymentId().toString())
                     .build();
 
-            PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
+            PaymentIntentCreateParams.Builder paramsBuilder = PaymentIntentCreateParams.builder()
                     .setAmount(command.amountMinor())
                     .setCurrency(command.currency().toLowerCase())
                     .setDescription("PayFlow Order " + command.orderId())
                     .putMetadata("orderId", command.orderId())
-                    .putMetadata("paymentId", command.paymentId().toString())
-                    .setAutomaticPaymentMethods(
-                            PaymentIntentCreateParams.AutomaticPaymentMethods.builder()
-                                    .setEnabled(true)
-                                    .build()
-                    )
-                    .build();
+                    .putMetadata("paymentId", command.paymentId().toString());
 
-            PaymentIntent intent = PaymentIntent.create(params, options);
+            if ("CARD".equalsIgnoreCase(command.paymentMethod())) {
+                paramsBuilder.setPaymentMethod("pm_card_visa")
+                             .setConfirm(true)
+                             .setReturnUrl(command.returnUrl() != null ? command.returnUrl() : "https://merchant.example.com/checkout/return");
+            } else {
+                paramsBuilder.setAutomaticPaymentMethods(
+                        PaymentIntentCreateParams.AutomaticPaymentMethods.builder().setEnabled(true).build()
+                );
+            }
+
+            PaymentIntent intent = PaymentIntent.create(paramsBuilder.build(), options);
 
             AttemptStatus status = mapStripeStatus(intent.getStatus());
             String redirectUrl = null;
