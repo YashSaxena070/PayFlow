@@ -2,6 +2,7 @@ import React from 'react';
 import { LogOut, User, Menu, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { SystemHealthBadge } from './SystemHealthBadge';
 
 interface Props {
   onOpenSimulator: () => void;
@@ -32,6 +33,7 @@ export const Navbar: React.FC<Props> = ({ onOpenSimulator, onToggleSidebar }) =>
           <span className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-[#EFEAE2] text-[#57534E] border border-[#E0D9CE]">
             Live Sandbox
           </span>
+          <SystemHealthBadge />
         </div>
       </div>
 
