@@ -37,8 +37,8 @@ public class StripeAdapter implements PaymentProviderPort {
     private final ObjectMapper objectMapper;
 
     public StripeAdapter(
-            @Value("${payflow.providers.stripe.api-key:sk_test_payflow_stripe_dummy}") String apiKey,
-            @Value("${payflow.providers.stripe.webhook-secret:whsec_test_stripe_secret_12345}") String webhookSecret,
+            @Value("${payflow.providers.stripe.api-key:${STRIPE_API_KEY:sk_test_payflow_stripe_dummy}}") String apiKey,
+            @Value("${payflow.providers.stripe.webhook-secret:${STRIPE_WEBHOOK_SECRET:whsec_test_stripe_secret_12345}}") String webhookSecret,
             ObjectMapper objectMapper) {
         this.apiKey = apiKey;
         this.webhookSecret = webhookSecret;

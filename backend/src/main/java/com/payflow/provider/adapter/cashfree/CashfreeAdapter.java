@@ -39,10 +39,10 @@ public class CashfreeAdapter implements PaymentProviderPort {
     private final HttpClient httpClient;
 
     public CashfreeAdapter(
-            @Value("${payflow.providers.cashfree.app-id:TEST_CF_APP_ID_DUMMY}") String appId,
-            @Value("${payflow.providers.cashfree.secret-key:cf_secret_key_dummy}") String secretKey,
-            @Value("${payflow.providers.cashfree.api-version:2023-08-01}") String apiVersion,
-            @Value("${payflow.providers.cashfree.base-url:https://sandbox.cashfree.com/pg}") String baseUrl,
+            @Value("${payflow.providers.cashfree.app-id:${CASHFREE_APP_ID:TEST_CF_APP_ID_DUMMY}}") String appId,
+            @Value("${payflow.providers.cashfree.secret-key:${CASHFREE_SECRET_KEY:cf_secret_key_dummy}}") String secretKey,
+            @Value("${payflow.providers.cashfree.api-version:${CASHFREE_API_VERSION:2023-08-01}}") String apiVersion,
+            @Value("${payflow.providers.cashfree.base-url:${CASHFREE_BASE_URL:https://sandbox.cashfree.com/pg}}") String baseUrl,
             ObjectMapper objectMapper) {
         this.appId = appId;
         this.secretKey = secretKey;

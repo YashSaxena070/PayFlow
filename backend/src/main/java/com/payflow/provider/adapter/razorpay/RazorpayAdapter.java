@@ -37,9 +37,9 @@ public class RazorpayAdapter implements PaymentProviderPort {
     private final ObjectMapper objectMapper;
 
     public RazorpayAdapter(
-            @Value("${payflow.providers.razorpay.key-id:rzp_test_payflow_dummy}") String keyId,
-            @Value("${payflow.providers.razorpay.key-secret:rzp_secret_dummy}") String keySecret,
-            @Value("${payflow.providers.razorpay.webhook-secret:whsec_test_razorpay_secret_12345}") String webhookSecret,
+            @Value("${payflow.providers.razorpay.key-id:${RAZORPAY_KEY_ID:rzp_test_payflow_dummy}}") String keyId,
+            @Value("${payflow.providers.razorpay.key-secret:${RAZORPAY_KEY_SECRET:rzp_secret_dummy}}") String keySecret,
+            @Value("${payflow.providers.razorpay.webhook-secret:${RAZORPAY_WEBHOOK_SECRET:whsec_test_razorpay_secret_12345}}") String webhookSecret,
             ObjectMapper objectMapper) {
         this.keyId = keyId;
         this.keySecret = keySecret;

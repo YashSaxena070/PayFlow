@@ -47,5 +47,40 @@ payflow:
     enabled: false
     listener:
       enabled: false
+  providers:
+    stripe:
+      api-key: ${STRIPE_API_KEY:sk_test_payflow_stripe_dummy}
+      webhook-secret: ${STRIPE_WEBHOOK_SECRET:whsec_test_stripe_secret_12345}
+      base-url: ${STRIPE_BASE_URL:https://api.stripe.com}
+      connect-timeout-ms: 5000
+      read-timeout-ms: 10000
+    adyen:
+      api-key: ${ADYEN_API_KEY:test_adyen_key_dummy}
+      merchant-account: ${ADYEN_MERCHANT_ACCOUNT:PayflowMerchant}
+      webhook-secret: ${ADYEN_WEBHOOK_SECRET:44782ECE0522E02C8D683BD34296A4E6FE5DF46E}
+      base-url: ${ADYEN_BASE_URL:https://checkout-test.adyen.com}
+      connect-timeout-ms: 5000
+      read-timeout-ms: 10000
+    razorpay:
+      key-id: ${RAZORPAY_KEY_ID:rzp_test_payflow_dummy}
+      key-secret: ${RAZORPAY_KEY_SECRET:rzp_secret_dummy}
+      webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:whsec_test_razorpay_secret_12345}
+      base-url: ${RAZORPAY_BASE_URL:https://api.razorpay.com/v1}
+      connect-timeout-ms: 5000
+      read-timeout-ms: 10000
+    payu:
+      key: ${PAYU_KEY:test_payu_merchant_key}
+      salt: ${PAYU_SALT:test_payu_merchant_salt}
+      base-url: ${PAYU_BASE_URL:https://test.payu.in}
+      service-url: ${PAYU_SERVICE_URL:https://test.payu.in/merchant/postservice.php?form=2}
+      connect-timeout-ms: 5000
+      read-timeout-ms: 10000
+    cashfree:
+      app-id: ${CASHFREE_APP_ID:TEST_CF_APP_ID_DUMMY}
+      secret-key: ${CASHFREE_SECRET_KEY:cf_secret_key_dummy}
+      api-version: ${CASHFREE_API_VERSION:2023-08-01}
+      base-url: ${CASHFREE_BASE_URL:https://sandbox.cashfree.com/pg}
+      connect-timeout-ms: 5000
+      read-timeout-ms: 10000
 
 

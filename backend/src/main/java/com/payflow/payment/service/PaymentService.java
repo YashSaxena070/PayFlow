@@ -35,7 +35,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class PaymentService {
@@ -334,5 +336,123 @@ public class PaymentService {
             }
         }
         return PaymentResponse.from(payment);
+    }
+
+    @Transactional
+    public PaymentResponse failoverPayment(UUID merchantId, UUID paymentId, String reason) {
+        Payment payment = paymentRepository.findByIdAndMerchantId(paymentId, merchantId)
+                .orElseThrow(() -> new PayflowException(ErrorCode.RESOURCE_NOT_FOUND, "Payment not found: " + paymentId));
+
+        if (payment.getStatus() == PaymentStatus.SUCCEEDED) {
+            return PaymentResponse.from(payment);
+        }
+
+        List<PaymentAttempt> existingAttempts = paymentAttemptRepository.findAllByPaymentIdOrderByAttemptNumberAsc(paymentId);
+        int nextAttemptNum = existingAttempts.size() + 1;
+
+        // Mark latest attempt as failed if still active or requires action
+        if (!existingAttempts.isEmpty()) {
+            PaymentAttempt latest = existingAttempts.get(existingAttempts.size() - 1);
+            if (!latest.getStatus().isTerminal()) {
+                latest.setStatus(AttemptStatus.FAILED);
+                latest.setFailureCode("FAILOVER_TRIGGERED");
+                latest.setFailureMessageSafe(reason != null && !reason.isBlank() ? reason : "Gateway payment failed or was declined. Cascaded to backup gateway.");
+                latest.setCompletedAt(Instant.now());
+                paymentAttemptRepository.save(latest);
+            }
+        }
+
+        // Determine fallback cascade chain from routing engine
+        RoutingDecision routingDecision = routingService.selectProvider(
+                merchantId, payment.getCurrency(), payment.getPaymentMethod(), payment.getAmountMinor(), null);
+
+        List<Provider> fullChain = new ArrayList<>();
+        fullChain.add(routingDecision.selectedProvider());
+        if (routingDecision.fallbackChain() != null) {
+            for (Provider p : routingDecision.fallbackChain()) {
+                if (!p.getId().equals(routingDecision.selectedProvider().getId())) {
+                    fullChain.add(p);
+                }
+            }
+        }
+
+        // Find attempted provider codes
+        Set<String> attemptedCodes = existingAttempts.stream()
+                .map(a -> a.getProvider().getCode().toLowerCase())
+                .collect(Collectors.toSet());
+
+        Provider nextProvider = null;
+        for (Provider p : fullChain) {
+            if (!attemptedCodes.contains(p.getCode().toLowerCase())) {
+                nextProvider = p;
+                break;
+            }
+        }
+
+        if (nextProvider == null) {
+            log.warn("No further backup providers available in cascade chain for payment {}", payment.getId());
+            payment.setStatus(PaymentStatus.FAILED);
+            paymentRepository.save(payment);
+            return PaymentResponse.from(payment);
+        }
+
+        log.info("Executing automatic smart failover attempt #{} for payment {} on backup gateway [{}]",
+                nextAttemptNum, payment.getId(), nextProvider.getCode());
+
+        PaymentAttempt newAttempt = new PaymentAttempt(
+                UUID.randomUUID(),
+                payment,
+                nextProvider,
+                nextAttemptNum,
+                payment.getAmountMinor()
+        );
+        newAttempt.setStatus(AttemptStatus.SUBMITTED);
+        newAttempt = paymentAttemptRepository.save(newAttempt);
+        payment.addAttempt(newAttempt);
+
+        PaymentProviderPort adapter = providerRegistry.getProvider(nextProvider.getCode());
+        PaymentProviderPort.InitiatePaymentCommand command = new PaymentProviderPort.InitiatePaymentCommand(
+                payment.getId(),
+                payment.getOrderId(),
+                payment.getAmountMinor(),
+                payment.getCurrency(),
+                payment.getPaymentMethod(),
+                null,
+                "REAL"
+        );
+
+        PaymentProviderPort.InitiatePaymentResult result;
+        try {
+            result = adapter.initiatePayment(command);
+        } catch (Exception ex) {
+            log.error("Failover provider {} failed on payment {}", nextProvider.getCode(), payment.getId(), ex);
+            result = new PaymentProviderPort.InitiatePaymentResult(
+                    null,
+                    AttemptStatus.FAILED,
+                    "GATEWAY_UNAVAILABLE",
+                    ex.getMessage(),
+                    null,
+                    "Gateway Error"
+            );
+        }
+
+        newAttempt.setProviderReference(result.providerReference());
+        newAttempt.setStatus(result.status());
+        newAttempt.setFailureCode(result.failureCode());
+        newAttempt.setFailureMessageSafe(result.failureMessageSafe());
+        if (result.status().isTerminal()) {
+            newAttempt.setCompletedAt(Instant.now());
+        }
+        paymentAttemptRepository.save(newAttempt);
+
+        switch (result.status()) {
+            case SUCCEEDED -> payment.setStatus(PaymentStatus.SUCCEEDED);
+            case FAILED -> payment.setStatus(PaymentStatus.FAILED);
+            case REQUIRES_ACTION -> payment.setStatus(PaymentStatus.REQUIRES_ACTION);
+            default -> payment.setStatus(PaymentStatus.PENDING);
+        }
+        payment = paymentRepository.save(payment);
+
+        return PaymentResponse.from(payment, result.redirectUrl(), result.metadata());
     }
 }

@@ -89,5 +89,15 @@ public class PaymentController {
         PaymentResponse response = paymentService.syncPaymentStatus(merchantId, paymentId);
         return ResponseEntity.ok(ApiResponse.of(response, CorrelationIdContext.get()));
     }
+
+    @PostMapping("/{paymentId}/failover")
+    public ResponseEntity<ApiResponse<PaymentResponse>> failoverPayment(
+            @PathVariable UUID paymentId,
+            @RequestBody(required = false) java.util.Map<String, String> body) {
+        UUID merchantId = getMerchantId();
+        String reason = body != null ? body.get("reason") : null;
+        PaymentResponse response = paymentService.failoverPayment(merchantId, paymentId, reason);
+        return ResponseEntity.ok(ApiResponse.of(response, CorrelationIdContext.get()));
+    }
 }
 
