@@ -45,14 +45,15 @@ public class SecurityConfig {
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json");
-                            response.getWriter().write("{\"error\":{\"code\":\"UNAUTHORIZED\",\"message\":\"Authentication token is missing, invalid or expired\"}}");
+                            response.getWriter().write(
+                                    "{\"error\":{\"code\":\"UNAUTHORIZED\",\"message\":\"Authentication token is missing, invalid or expired\"}}");
                         })
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                             response.setContentType("application/json");
-                            response.getWriter().write("{\"error\":{\"code\":\"FORBIDDEN\",\"message\":\"Access denied to requested resource\"}}");
-                        })
-                )
+                            response.getWriter().write(
+                                    "{\"error\":{\"code\":\"FORBIDDEN\",\"message\":\"Access denied to requested resource\"}}");
+                        }))
                 .authorizeHttpRequests(auth -> auth
                         // Public Endpoints
                         .requestMatchers("/health", "/health/**", "/api/v1/health", "/api/v1/health/**").permitAll()
@@ -62,8 +63,7 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         // Protected API Endpoints
                         .requestMatchers("/api/v1/**").authenticated()
-                        .anyRequest().permitAll()
-                )
+                        .anyRequest().permitAll())
                 .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -73,8 +73,17 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(List.of("*"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedOrigins(List.of(
+                "https://pay-flow-xute.vercel.app/"));
+
+        config.setAllowedMethods(List.of(
+                "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+
+        config.setAllowedHeaders(List.of(
+                "Authorization",
+                "Content-Type",
+                "Accept",
+                "Origin"));
         config.setExposedHeaders(List.of("X-Correlation-ID", "Content-Disposition"));
         config.setAllowCredentials(true);
 

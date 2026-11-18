@@ -1,178 +1,40 @@
+
 server:
   port: ${PORT:8080}
-  servlet:
-    context-path: /
 
 spring:
   application:
     name: fluxpay
-  profiles:
-    default: local
+
   datasource:
-    url: ${DATABASE_URL:jdbc:h2:mem:payflowdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH}
-    username: ${DATABASE_USERNAME:sa}
-    password: ${DATABASE_PASSWORD:}
-    driver-class-name: ${DATABASE_DRIVER:org.h2.Driver}
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 10
-      minimum-idle: 2
-      idle-timeout: 300000
-      connection-timeout: 20000
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 30000
+
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
   flyway:
     enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
+
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
-  data:
-    redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-      database: ${REDIS_DATABASE:0}
-      timeout: 2000ms
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
-      acks: all
-      retries: 3
-    consumer:
-      group-id: payflow-core-group
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
-# Payflow Security & Token Config
 payflow:
-  security:
-    jwt:
-      secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
-      expiration-ms: 86400000 # 24 hours
-  idempotency:
-    ttl-seconds: 86400
-  reconciliation:
-    stale-threshold-minutes: 15
-    cron: "0 */5 * * * *"
-  outbox:
-    polling-interval-ms: 2000
-    batch-size: 50
-    max-retry-attempts: 5
   kafka:
-    enabled: true
-    topic: payflow.payments.events
+    enabled: false
     listener:
-      enabled: ${KAFKA_LISTENER_ENABLED:false}
-  simulator:
-    enabled: true
-  providers:
-    stripe:
-      api-key: ${STRIPE_API_KEY:sk_test_payflow_stripe_dummy}
-      webhook-secret: ${STRIPE_WEBHOOK_SECRET:whsec_test_stripe_secret_12345}
-      base-url: ${STRIPE_BASE_URL:https://api.stripe.com}
-      connect-timeout-ms: 5000
-      read-timeout-ms: 10000
-    adyen:
-      api-key: ${ADYEN_API_KEY:test_adyen_key_dummy}
-      merchant-account: ${ADYEN_MERCHANT_ACCOUNT:PayflowMerchant}
-      webhook-secret: ${ADYEN_WEBHOOK_SECRET:44782ECE0522E02C8D683BD34296A4E6FE5DF46E}
-      base-url: ${ADYEN_BASE_URL:https://checkout-test.adyen.com}
-      connect-timeout-ms: 5000
-      read-timeout-ms: 10000
-    razorpay:
-      key-id: ${RAZORPAY_KEY_ID:rzp_test_payflow_dummy}
-      key-secret: ${RAZORPAY_KEY_SECRET:rzp_secret_dummy}
-      webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:whsec_test_razorpay_secret_12345}
-      base-url: ${RAZORPAY_BASE_URL:https://api.razorpay.com/v1}
-      connect-timeout-ms: 5000
-      read-timeout-ms: 10000
-    payu:
-      key: ${PAYU_KEY:test_payu_merchant_key}
-      salt: ${PAYU_SALT:test_payu_merchant_salt}
-      base-url: ${PAYU_BASE_URL:https://test.payu.in}
-      service-url: ${PAYU_SERVICE_URL:https://test.payu.in/merchant/postservice.php?form=2}
-      connect-timeout-ms: 5000
-      read-timeout-ms: 10000
-    cashfree:
-      app-id: ${CASHFREE_APP_ID:TEST_CF_APP_ID_DUMMY}
-      secret-key: ${CASHFREE_SECRET_KEY:cf_secret_key_dummy}
-      api-version: ${CASHFREE_API_VERSION:2023-08-01}
-      base-url: ${CASHFREE_BASE_URL:https://sandbox.cashfree.com/pg}
-      connect-timeout-ms: 5000
-      read-timeout-ms: 10000
-
-# Resilience4j
-resilience4j:
-  circuitbreaker:
-    instances:
-      stripe:
-        sliding-window-size: 10
-        minimum-number-of-calls: 5
-        failure-rate-threshold: 50.0
-        wait-duration-in-open-state: 10000ms
-        permitted-number-of-calls-in-half-open-state: 3
-        automatic-transition-from-open-to-half-open-enabled: true
-      adyen:
-        sliding-window-size: 10
-        minimum-number-of-calls: 5
-        failure-rate-threshold: 50.0
-        wait-duration-in-open-state: 10000ms
-        permitted-number-of-calls-in-half-open-state: 3
-        automatic-transition-from-open-to-half-open-enabled: true
-      razorpay:
-        sliding-window-size: 10
-        minimum-number-of-calls: 5
-        failure-rate-threshold: 50.0
-        wait-duration-in-open-state: 10000ms
-        permitted-number-of-calls-in-half-open-state: 3
-        automatic-transition-from-open-to-half-open-enabled: true
-      payu:
-        sliding-window-size: 10
-        minimum-number-of-calls: 5
-        failure-rate-threshold: 50.0
-        wait-duration-in-open-state: 10000ms
-        permitted-number-of-calls-in-half-open-state: 3
-        automatic-transition-from-open-to-half-open-enabled: true
-      cashfree:
-        sliding-window-size: 10
-        minimum-number-of-calls: 5
-        failure-rate-threshold: 50.0
-        wait-duration-in-open-state: 10000ms
-        permitted-number-of-calls-in-half-open-state: 3
-        automatic-transition-from-open-to-half-open-enabled: true
-
-# Observability & Actuator
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,prometheus
-  endpoint:
-    health:
-      show-details: always
-      probes:
-        enabled: true
-  metrics:
-    export:
-      prometheus:
-        enabled: true
-    distribution:
-      percentiles-histogram:
-        http.server.requests: true
-
-# OpenAPI documentation
-springdoc:
-  api-docs:
-    path: /v3/api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-    tags-sorter: alpha
-    operations-sorter: method
-
+      enabled: false
