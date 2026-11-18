@@ -7,7 +7,7 @@ const rawUrl = (
   'http://localhost:8080'
 ).toString().trim().replace(/\/+$/, '');
 
-const API_BASE = rawUrl.endsWith('/api/v1') ? rawUrl : `${rawUrl}/api/v1`;
+export const API_BASE = rawUrl.endsWith('/api/v1') ? rawUrl : `${rawUrl}/api/v1`;
 
 export function getStoredToken(): string | null {
   return (
@@ -42,16 +42,19 @@ export async function apiRequest<T>(
 ): Promise<T> {
   const token = getStoredToken();
   const headers = new Headers(options.headers || {});
+  const method = (options.method || 'GET').toUpperCase();
 
-  if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
+  // Only set Content-Type if there is a request body and method is not GET/HEAD
+  if (method !== 'GET' && method !== 'HEAD' && !headers.has('Content-Type') && !(options.body instanceof FormData)) {
     headers.set('Content-Type', 'application/json');
   }
 
-  if (token && !headers.has('Authorization')) {
+  // Only attach auth if token exists and endpoint is not public health or login
+  if (token && !headers.has('Authorization') && !endpoint.includes('/health') && !endpoint.includes('/auth/login')) {
     headers.set('Authorization', `Bearer ${token}`);
   }
 
-  if (!headers.has('X-Correlation-ID')) {
+  if (!headers.has('X-Correlation-ID') && !endpoint.includes('/health')) {
     headers.set('X-Correlation-ID', crypto.randomUUID());
   }
 
