@@ -45,7 +45,7 @@ public class HealthController {
         this.environment = environment;
     }
 
-    @GetMapping(value = {"/health", "/health/", "/api/v1/health", "/api/v1/health/"})
+    @GetMapping(value = {"/", "/health", "/health/", "/api/v1/health", "/api/v1/health/"})
     @Operation(summary = "Comprehensive Health Check", description = "Returns deep health status across database, cache, message broker, and payment gateways")
     public ResponseEntity<Map<String, Object>> getHealth() {
         Map<String, Object> response = new LinkedHashMap<>();
