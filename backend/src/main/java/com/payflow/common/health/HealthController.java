@@ -29,24 +29,23 @@ public class HealthController {
 
     private static final Logger log = LoggerFactory.getLogger(HealthController.class);
 
-    private final Optional<DataSource> dataSource;
-    private final Optional<StringRedisTemplate> redisTemplate;
+    @Autowired(required = false)
+    private DataSource dataSource;
+
+    @Autowired(required = false)
+    private StringRedisTemplate redisTemplate;
+
     private final ProviderRegistry providerRegistry;
     private final Environment environment;
 
-    @Autowired
     public HealthController(
-            Optional<DataSource> dataSource,
-            Optional<StringRedisTemplate> redisTemplate,
             ProviderRegistry providerRegistry,
             Environment environment) {
-        this.dataSource = dataSource;
-        this.redisTemplate = redisTemplate;
         this.providerRegistry = providerRegistry;
         this.environment = environment;
     }
 
-    @GetMapping(value = {"/health", "/api/v1/health"})
+    @GetMapping(value = {"/health", "/health/", "/api/v1/health", "/api/v1/health/"})
     @Operation(summary = "Comprehensive Health Check", description = "Returns deep health status across database, cache, message broker, and payment gateways")
     public ResponseEntity<Map<String, Object>> getHealth() {
         Map<String, Object> response = new LinkedHashMap<>();
@@ -91,7 +90,7 @@ public class HealthController {
         return ResponseEntity.status(isHealthy ? HttpStatus.OK : HttpStatus.SERVICE_UNAVAILABLE).body(response);
     }
 
-    @GetMapping(value = {"/health/live", "/api/v1/health/live"})
+    @GetMapping(value = {"/health/live", "/health/live/", "/api/v1/health/live", "/api/v1/health/live/"})
     @Operation(summary = "Liveness Probe", description = "Fast liveness check for load balancers and container runtimes")
     public ResponseEntity<Map<String, String>> getLiveness() {
         return ResponseEntity.ok(Map.of(
@@ -101,7 +100,7 @@ public class HealthController {
         ));
     }
 
-    @GetMapping(value = {"/health/ready", "/api/v1/health/ready"})
+    @GetMapping(value = {"/health/ready", "/health/ready/", "/api/v1/health/ready", "/api/v1/health/ready/"})
     @Operation(summary = "Readiness Probe", description = "Readiness check verifying database connectivity before accepting live traffic")
     public ResponseEntity<Map<String, String>> getReadiness() {
         Map<String, Object> dbCheck = checkDatabase();
@@ -117,14 +116,14 @@ public class HealthController {
 
     private Map<String, Object> checkDatabase() {
         Map<String, Object> check = new LinkedHashMap<>();
-        if (dataSource.isEmpty()) {
+        if (dataSource == null) {
             check.put("status", "DISABLED");
             check.put("message", "No DataSource configured");
             return check;
         }
 
         long start = System.currentTimeMillis();
-        try (Connection conn = dataSource.get().getConnection();
+        try (Connection conn = dataSource.getConnection();
              Statement stmt = conn.createStatement()) {
             stmt.execute("SELECT 1");
             long latency = System.currentTimeMillis() - start;
@@ -141,7 +140,7 @@ public class HealthController {
 
     private Map<String, Object> checkRedis() {
         Map<String, Object> check = new LinkedHashMap<>();
-        if (redisTemplate.isEmpty()) {
+        if (redisTemplate == null) {
             check.put("status", "OPTIONAL");
             check.put("message", "Redis template not registered (local fallback active)");
             return check;
@@ -149,7 +148,7 @@ public class HealthController {
 
         long start = System.currentTimeMillis();
         try {
-            RedisConnection connection = Objects.requireNonNull(redisTemplate.get().getConnectionFactory()).getConnection();
+            RedisConnection connection = Objects.requireNonNull(redisTemplate.getConnectionFactory()).getConnection();
             String ping = connection.ping();
             long latency = System.currentTimeMillis() - start;
             check.put("status", "PONG".equalsIgnoreCase(ping) ? "UP" : "DEGRADED");

@@ -393,16 +393,36 @@ export const PaymentSimulatorModal: React.FC<Props> = ({ isOpen, onClose, onPaym
           )}
 
           {result && (
-            <div className="p-4 rounded-2xl bg-[#E2F899] border border-[#D4EE7F] text-[#191816] space-y-3">
-              <div className="flex items-center justify-between border-b border-[#D4EE7F] pb-2">
+            <div className={`p-4 rounded-2xl border space-y-3 ${
+              result.status === 'SUCCEEDED'
+                ? 'bg-[#E2F899] border-[#D4EE7F] text-[#191816]'
+                : result.status === 'REQUIRES_ACTION' || result.status === 'PROCESSING' || result.status === 'PENDING'
+                ? 'bg-[#FEF3C7] border-[#FDE68A] text-[#92400E]'
+                : 'bg-[#FED7CA] border-[#FCA5A5] text-[#991B1B]'
+            }`}>
+              <div className={`flex items-center justify-between border-b pb-2 ${
+                result.status === 'SUCCEEDED'
+                  ? 'border-[#D4EE7F]'
+                  : result.status === 'REQUIRES_ACTION' || result.status === 'PENDING' || result.status === 'PROCESSING'
+                  ? 'border-[#FDE68A]'
+                  : 'border-[#FCA5A5]'
+              }`}>
                 <div className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#2C410F]" />
+                  {result.status === 'SUCCEEDED' ? (
+                    <CheckCircle2 className="w-4 h-4 text-[#2C410F]" />
+                  ) : result.status === 'REQUIRES_ACTION' || result.status === 'PENDING' || result.status === 'PROCESSING' ? (
+                    <Clock className="w-4 h-4 text-[#D97706] animate-pulse" />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 text-[#991B1B]" />
+                  )}
                   <span className="text-xs font-semibold">
                     {result.status === 'SUCCEEDED'
-                      ? 'Payment Processed Successfully'
+                      ? 'Payment Successfully Captured & Settled'
                       : result.status === 'REQUIRES_ACTION'
-                      ? 'Payment Requires Gateway Checkout'
-                      : 'Payment Orchestration Active'}
+                      ? 'Payment Initiated · Complete Real Checkout on Gateway'
+                      : result.status === 'PENDING' || result.status === 'PROCESSING'
+                      ? 'Payment In-Flight · Awaiting Customer Completion'
+                      : 'Payment Failed on Gateway'}
                   </span>
                 </div>
                 <StatusBadge status={result.status} size="sm" />

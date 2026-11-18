@@ -156,11 +156,11 @@ public class PaymentService {
             lastAttempt = attempt;
 
             // In AUTO_FAILOVER scenario:
-            // Attempt #1 is injected with a 502/Provider error to demonstrate outage resilience.
-            // Attempt #2 executes normally with SUCCESS to rescue the payment.
+            // Attempt #1 encounters an outage (5XX) to demonstrate resilience.
+            // Attempt #2 executes a REAL transaction on the backup gateway to rescue the payment.
             String attemptScenario = request.testScenario();
             if (isAutoFailover) {
-                attemptScenario = (attemptNum == 1) ? "5XX" : "SUCCESS";
+                attemptScenario = (attemptNum == 1) ? "5XX" : "REAL";
             }
 
             PaymentProviderPort adapter = providerRegistry.getProvider(currentProvider.getCode());

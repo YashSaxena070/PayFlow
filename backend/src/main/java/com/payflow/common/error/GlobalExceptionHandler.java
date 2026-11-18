@@ -105,6 +105,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
     }
 
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleNoResourceFound(org.springframework.web.servlet.resource.NoResourceFoundException ex) {
+        String correlationId = CorrelationIdContext.get();
+        log.warn("Static resource or endpoint not found [correlationId={}]: {}", correlationId, ex.getResourcePath());
+        ApiErrorResponse body = ApiErrorResponse.of(
+                ErrorCode.RESOURCE_NOT_FOUND.name(),
+                "Resource or endpoint not found: /" + ex.getResourcePath(),
+                List.of(ex.getMessage()),
+                correlationId
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGenericException(Exception ex) {
         String correlationId = CorrelationIdContext.get();
