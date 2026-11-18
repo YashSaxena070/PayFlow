@@ -1,7 +1,19 @@
-const API_BASE = '/api/v1';
+
+// Base backend URL fallback for local development: http://localhost:8080
+// In cloud environments (e.g. Vercel), set VITE_API_URL or VITE_API_BASE_URL to your Render backend URL.
+const rawUrl = (
+  import.meta.env.VITE_API_URL ||
+  import.meta.env.VITE_API_BASE_URL ||
+  'http://localhost:8080'
+).toString().trim().replace(/\/+$/, '');
+
+const API_BASE = rawUrl.endsWith('/api/v1') ? rawUrl : `${rawUrl}/api/v1`;
 
 export function getStoredToken(): string | null {
-  return localStorage.getItem('fluxpay_token') || localStorage.getItem('payflow_token');
+  return (
+    localStorage.getItem('fluxpay_token') ||
+    localStorage.getItem('payflow_token')
+  );
 }
 
 export function setStoredSession(token: string, sessionData: any) {
@@ -17,7 +29,10 @@ export function clearStoredSession() {
 }
 
 export function getStoredSession(): any | null {
-  const data = localStorage.getItem('fluxpay_session') || localStorage.getItem('payflow_session');
+  const data =
+    localStorage.getItem('fluxpay_session') ||
+    localStorage.getItem('payflow_session');
+
   return data ? JSON.parse(data) : null;
 }
 
@@ -40,7 +55,11 @@ export async function apiRequest<T>(
     headers.set('X-Correlation-ID', crypto.randomUUID());
   }
 
-  const response = await fetch(`${API_BASE}${endpoint}`, {
+  const normalizedEndpoint = endpoint.startsWith('/')
+    ? endpoint
+    : `/${endpoint}`;
+
+  const response = await fetch(`${API_BASE}${normalizedEndpoint}`, {
     ...options,
     headers,
   });
@@ -48,9 +67,12 @@ export async function apiRequest<T>(
   const json = await response.json().catch(() => null);
 
   if (!response.ok) {
-    // If the token is invalid, expired, or forbidden, clear the stale session
-    if ((response.status === 401 || response.status === 403) && !endpoint.includes('/auth/login')) {
+    if (
+      (response.status === 401 || response.status === 403) &&
+      !endpoint.includes('/auth/login')
+    ) {
       clearStoredSession();
+
       if (
         typeof window !== 'undefined' &&
         window.location.pathname !== '/login' &&
@@ -60,13 +82,18 @@ export async function apiRequest<T>(
       }
     }
 
-    const errorMsg = json?.error?.message || json?.message || `Request failed with status ${response.status}`;
+    const errorMsg =
+      json?.error?.message ||
+      json?.message ||
+      `Request failed with status ${response.status}`;
+
     const err = new Error(errorMsg) as any;
     err.code = json?.error?.code || 'UNKNOWN_ERROR';
     err.status = response.status;
     err.correlationId = json?.meta?.correlationId;
+
     throw err;
   }
 
-  return json.data !== undefined ? json.data : json;
+  return (json?.data !== undefined ? json.data : json) as T;
 }
