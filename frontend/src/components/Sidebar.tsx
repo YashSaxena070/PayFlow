@@ -81,7 +81,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           })}
         </nav>
 
-        {/* Quick link to Landing / Simulator */}
+        {/* Quick link to Landing / Showcase */}
         <div className="px-4 pt-2">
           <NavLink
             to="/"
@@ -90,7 +90,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           >
             <div className="flex items-center space-x-2">
               <Sparkles className="w-3.5 h-3.5 text-[#FF5A36]" />
-              <span>Public Simulator</span>
+              <span>Public Showcase</span>
             </div>
             <Globe className="w-3.5 h-3.5 text-[#78716C]" />
           </NavLink>
@@ -102,7 +102,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         <div className="p-3.5 bg-white rounded-2xl border border-[#EBE6DD] shadow-sm">
           <p className="text-[10px] text-[#78716C] uppercase tracking-wider font-semibold">Active Tenant</p>
           <p className="text-xs font-semibold text-[#191816] truncate mt-0.5">
-            {session?.merchantId ? `Merchant: ${session.merchantId.substring(0, 8)}...` : 'Acme Global Demo'}
+            {session?.merchantId ? `Merchant: ${session.merchantId.substring(0, 8)}...` : 'Acme Global Enterprise'}
           </p>
           <div className="mt-2 pt-2 border-t border-[#F3EFE8] flex items-center justify-between text-[11px] text-[#78716C]">
             <span>Role:</span>

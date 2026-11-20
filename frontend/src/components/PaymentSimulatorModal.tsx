@@ -16,9 +16,8 @@ export const PaymentSimulatorModal: React.FC<Props> = ({ isOpen, onClose, onPaym
   const [currency, setCurrency] = useState('INR');
   const [paymentMethod, setPaymentMethod] = useState('CARD');
   const [preferredProvider, setPreferredProvider] = useState('AUTO');
-  const [scenario, setScenario] = useState('REAL'); // Default to REAL live transactions!
-  const [customerName, setCustomerName] = useState('Acme Test Merchant');
-  const [customerEmail, setCustomerEmail] = useState('customer@payflow.dev');
+  const [customerName, setCustomerName] = useState('Acme Enterprise Merchant');
+  const [customerEmail, setCustomerEmail] = useState('billing@acme.com');
   const [customerPhone, setCustomerPhone] = useState('9876543210');
 
   const [loading, setLoading] = useState(false);
@@ -160,7 +159,6 @@ export const PaymentSimulatorModal: React.FC<Props> = ({ isOpen, onClose, onPaym
           currency,
           paymentMethod,
           returnUrl: window.location.origin + '/payments',
-          testScenario: scenario,
           preferredProvider: preferredProvider === 'AUTO' ? null : preferredProvider.toLowerCase(),
         }),
       });
@@ -215,12 +213,12 @@ export const PaymentSimulatorModal: React.FC<Props> = ({ isOpen, onClose, onPaym
       <div className="bg-white border border-[#EBE6DD] rounded-3xl max-w-xl w-full shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 max-h-[92vh] flex flex-col">
         <div className="px-6 py-4 border-b border-[#EBE6DD] flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-2.5">
-            <div className="w-8 h-8 rounded-full bg-[#FED7CA] flex items-center justify-center text-[#FF5A36]">
+            <div className="w-8 h-8 rounded-full bg-[#E2F899] flex items-center justify-center text-[#2C410F]">
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-semibold text-base text-[#191816]">Payment Orchestration Engine</h3>
-              <p className="text-xs text-[#78716C]">Live Multi-Gateway Routing, Cascading Failovers & Test Checkouts</p>
+              <h3 className="font-semibold text-base text-[#191816]">Enterprise Virtual Terminal</h3>
+              <p className="text-xs text-[#78716C]">Production Payment Gateway Orchestration & Live Multi-Gateway Checkout</p>
             </div>
           </div>
           <button onClick={onClose} className="text-[#78716C] hover:text-[#191816] p-1.5 rounded-lg hover:bg-[#FAF7F2]">
@@ -261,9 +259,9 @@ export const PaymentSimulatorModal: React.FC<Props> = ({ isOpen, onClose, onPaym
               <div className="flex items-center justify-between text-xs font-semibold text-[#57534E]">
                 <span className="flex items-center space-x-1.5 text-[#191816]">
                   <Sparkles className="w-3.5 h-3.5 text-[#FF5A36]" />
-                  <span>Customer Prefill Details (Sent to Gateway)</span>
+                  <span>Customer Billing & Identity Details</span>
                 </span>
-                <span className="text-[10px] text-[#78716C] font-normal">Real Test Transaction</span>
+                <span className="text-[10px] text-[#78716C] font-normal">Passed to Gateway Checkout</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 <div>
@@ -296,7 +294,7 @@ export const PaymentSimulatorModal: React.FC<Props> = ({ isOpen, onClose, onPaym
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-[#57534E] mb-1">Currency</label>
                 <select
@@ -311,23 +309,23 @@ export const PaymentSimulatorModal: React.FC<Props> = ({ isOpen, onClose, onPaym
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#57534E] mb-1">Route Gateway</label>
+                <label className="block text-xs font-semibold text-[#57534E] mb-1">Routing Policy</label>
                 <select
                   value={preferredProvider}
                   onChange={(e) => setPreferredProvider(e.target.value)}
                   className="w-full bg-[#FAF7F2] border border-[#EBE6DD] rounded-xl px-3 py-2 text-sm text-[#191816] focus:outline-none focus:border-[#FF5A36] font-medium"
                 >
-                  <option value="AUTO">✨ Auto (Intelligent Dynamic Routing)</option>
-                  <option value="RAZORPAY">Razorpay (Live Sandbox)</option>
-                  <option value="STRIPE">Stripe (Live Sandbox)</option>
-                  <option value="CASHFREE">Cashfree (Live Sandbox)</option>
-                  <option value="ADYEN">Adyen (Live Sandbox)</option>
-                  <option value="PAYU">PayU (Live Sandbox)</option>
+                  <option value="AUTO">✨ Dynamic Smart Routing (Active-Active)</option>
+                  <option value="RAZORPAY">Razorpay Gateway</option>
+                  <option value="STRIPE">Stripe Gateway</option>
+                  <option value="CASHFREE">Cashfree Gateway</option>
+                  <option value="ADYEN">Adyen Gateway</option>
+                  <option value="PAYU">PayU Gateway</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#57534E] mb-1">Method</label>
+                <label className="block text-xs font-semibold text-[#57534E] mb-1">Payment Method</label>
                 <select
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
@@ -339,34 +337,19 @@ export const PaymentSimulatorModal: React.FC<Props> = ({ isOpen, onClose, onPaym
                   <option value="WALLET">Digital Wallet</option>
                 </select>
               </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-[#57534E] mb-1">Orchestration Mode</label>
-                <select
-                  value={scenario}
-                  onChange={(e) => setScenario(e.target.value)}
-                  className="w-full bg-[#FAF7F2] border border-[#EBE6DD] rounded-xl px-3 py-2 text-sm text-[#191816] focus:outline-none focus:border-[#FF5A36] font-medium"
-                >
-                  <option value="REAL">✨ REAL LIVE TRANSACTION (Automate to Real Gateway)</option>
-                  <option value="AUTO_FAILOVER">⚡ SMART FAILOVER (Simulate 502 ➔ Cascade to Backup)</option>
-                  <option value="DECLINE">Simulate Card Decline</option>
-                  <option value="TIMEOUT">Simulate Ambiguous Timeout (➔ Reconcile)</option>
-                  <option value="SUCCESS">Direct Mock Success (200)</option>
-                </select>
-              </div>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-[#111827] hover:bg-black disabled:opacity-50 text-white font-medium rounded-full shadow-md transition-all flex items-center justify-center space-x-2 text-sm cursor-pointer"
+              className="w-full py-3.5 px-4 bg-[#111827] hover:bg-black disabled:opacity-50 text-white font-medium rounded-full shadow-md transition-all flex items-center justify-center space-x-2 text-sm cursor-pointer"
             >
               {loading ? (
                 <Clock className="w-4 h-4 animate-spin text-white" />
               ) : (
                 <>
                   <Play className="w-3.5 h-3.5 fill-current text-[#E2F899]" />
-                  <span>Execute Payment Orchestration</span>
+                  <span>Process Secure Payment</span>
                 </>
               )}
             </button>

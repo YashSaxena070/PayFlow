@@ -71,10 +71,10 @@ export const DashboardPage: React.FC<Props> = ({ onOpenSimulator }) => {
           </button>
           <button
             onClick={onOpenSimulator}
-            className="px-5 py-2.5 bg-[#FF5A36] hover:bg-[#E84B29] text-white font-medium text-sm rounded-full shadow-md shadow-[#FF5A36]/20 transition-all flex items-center space-x-2"
+            className="px-5 py-2.5 bg-[#FF5A36] hover:bg-[#E84B29] text-white font-medium text-sm rounded-full shadow-md shadow-[#FF5A36]/20 transition-all flex items-center space-x-2 cursor-pointer"
           >
             <Sparkles className="w-4 h-4" />
-            <span>Simulate Payment</span>
+            <span>New Transaction</span>
           </button>
         </div>
       </div>
@@ -274,7 +274,7 @@ export const DashboardPage: React.FC<Props> = ({ onOpenSimulator }) => {
               </div>
             </div>
           )) || (
-            <p className="text-xs text-[#78716C] col-span-2">No provider metrics recorded yet. Trigger a payment using the simulator.</p>
+            <p className="text-xs text-[#78716C] col-span-2">No provider metrics recorded yet. Process payments via the virtual terminal.</p>
           )}
         </div>
       </div>

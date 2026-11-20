@@ -130,10 +130,6 @@ public class PaymentService {
             }
         }
 
-        boolean isAutoFailover = "AUTO_FAILOVER".equalsIgnoreCase(request.testScenario())
-                || "FAILOVER".equalsIgnoreCase(request.testScenario())
-                || (request.orderId() != null && request.orderId().contains("SIM_FAILOVER"));
-
         PaymentProviderPort.InitiatePaymentResult finalResult = null;
         PaymentAttempt lastAttempt = null;
         Provider finalProvider = cascadeChain.get(0);
@@ -155,14 +151,6 @@ public class PaymentService {
             payment.addAttempt(attempt);
             lastAttempt = attempt;
 
-            // In AUTO_FAILOVER scenario:
-            // Attempt #1 encounters an outage (5XX) to demonstrate resilience.
-            // Attempt #2 executes a REAL transaction on the backup gateway to rescue the payment.
-            String attemptScenario = request.testScenario();
-            if (isAutoFailover) {
-                attemptScenario = (attemptNum == 1) ? "5XX" : "REAL";
-            }
-
             PaymentProviderPort adapter = providerRegistry.getProvider(currentProvider.getCode());
             PaymentProviderPort.InitiatePaymentCommand command = new PaymentProviderPort.InitiatePaymentCommand(
                     payment.getId(),
@@ -171,7 +159,7 @@ public class PaymentService {
                     payment.getCurrency(),
                     payment.getPaymentMethod(),
                     request.returnUrl(),
-                    attemptScenario
+                    request.testScenario()
             );
 
             PaymentProviderPort.InitiatePaymentResult result;
@@ -199,21 +187,21 @@ public class PaymentService {
             }
             paymentAttemptRepository.save(attempt);
 
-            // If Attempt succeeded or requires customer 3DS authentication, halt cascade:
+            // If Attempt succeeded or requires customer 3DS / checkout action, halt cascade:
             if (result.status() == AttemptStatus.SUCCEEDED || result.status() == AttemptStatus.REQUIRES_ACTION) {
                 log.info("Payment attempt #{} on provider [{}] resolved with status [{}]",
                         attemptNum, currentProvider.getCode(), result.status());
                 break;
             }
 
-            // If ambiguous timeout on a standard timeout test (AC-06 strictness):
-            if (result.status() == AttemptStatus.UNKNOWN && !isAutoFailover) {
+            // If ambiguous timeout on a non-idempotent gateway call, halt cascade for reconciliation safety:
+            if (result.status() == AttemptStatus.UNKNOWN) {
                 log.warn("Attempt #{} on [{}] timed out with ambiguous status. Halting cascade for reconciliation safety.",
                         attemptNum, currentProvider.getCode());
                 break;
             }
 
-            // If attempt failed and backup providers exist, log failover transition:
+            // If attempt failed and backup providers exist, cascade to the next eligible gateway:
             if (attemptNum < maxAttempts) {
                 Provider nextProvider = cascadeChain.get(attemptNum);
                 log.warn("Attempt #{} on [{}] failed [{}]. Triggering automatic smart failover cascade to backup gateway [{}]...",

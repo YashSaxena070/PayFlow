@@ -290,9 +290,9 @@ export const LandingPage: React.FC = () => {
                 </button>
                 <button
                   onClick={() => handleSimulatePayment()}
-                  className="border border-[#D6D0C7] hover:border-[#111827] text-[#191816] px-6 py-4 rounded-full text-base font-medium transition-all bg-white/60 backdrop-blur-sm"
+                  className="border border-[#D6D0C7] hover:border-[#111827] text-[#191816] px-6 py-4 rounded-full text-base font-medium transition-all bg-white/60 backdrop-blur-sm cursor-pointer"
                 >
-                  Test simulator
+                  Launch Checkout Terminal
                 </button>
               </div>
               <p className="text-xs text-[#78716C] font-normal tracking-tight">
@@ -307,15 +307,15 @@ export const LandingPage: React.FC = () => {
               {/* Card Header */}
               <div className="flex items-center justify-between mb-6">
                 <span className="font-semibold text-xl text-[#191816] tracking-tight">FluxPay</span>
-                <span className="text-[11px] font-medium tracking-wider uppercase text-[#57534E] bg-white/40 px-2.5 py-1 rounded-full">
-                  SIMULATION
+                <span className="text-[11px] font-medium tracking-wider uppercase text-[#2C410F] bg-[#E2F899] px-2.5 py-1 rounded-full">
+                  LIVE ORCHESTRATION
                 </span>
               </div>
 
               {/* Inner White Simulator Card */}
               <div className="bg-white rounded-2xl p-6 shadow-sm mb-4 border border-white">
                 <div className="text-[11px] font-medium text-[#8A857D] uppercase tracking-wider mb-2">
-                  ACME GLOBAL / PAYMENT SIMULATOR
+                  ACME GLOBAL / CHECKOUT TERMINAL
                 </div>
 
                 <div className="text-sm font-normal text-[#44403C] mb-3 flex items-center justify-between">
